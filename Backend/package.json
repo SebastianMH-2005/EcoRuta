@@ -2,9 +2,9 @@
   "name": "ecoruta-backend",
   "version": "1.0.0",
   "description": "Backend de EcoRuta Conectada",
-  "main": "Servidor.js",
+  "main": "servidor.js",
   "scripts": {
-    "start": "node Servidor.js"
+    "start": "node servidor.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
