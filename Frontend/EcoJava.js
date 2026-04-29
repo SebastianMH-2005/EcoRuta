@@ -62,7 +62,7 @@ botonOjo.addEventListener('click', function() {
 /* URL del backend: detecta automáticamente si estás en local o en producción */
 var URL_BACKEND = window.location.hostname === 'localhost'
   ? 'http://localhost:3000'
-  : 'https://ecoruta-backend.railway.app';
+  : 'https://ecoruta-production.up.railway.app';
 
 /* Muestra un mensaje de error en el formulario de login */
 function mostrarError(mensaje) {
