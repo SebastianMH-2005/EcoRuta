@@ -208,13 +208,16 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 }).addTo(mapa);
 
 /* ══════════════════════════════════════
-   3. DATOS DE LOS CAMIONES (simulados)
+   3. DATOS DE LOS CAMIONES
+   Placas reales registradas en Supabase.
+   Cada camión tiene puntos de ruta para
+   la animación simulada en el mapa.
    ══════════════════════════════════════ */
 
 var listaCamiones = [
   {
-    id: 'ECO-01',
-    nombre: 'ECO-01',
+    id: 'ABC-123',
+    nombre: 'ABC-123',
     ruta: 'Ruta Centro Histórico',
     color: '#1D9E75',
     estado: 'activo',
@@ -226,8 +229,8 @@ var listaCamiones = [
     ]
   },
   {
-    id: 'ECO-02',
-    nombre: 'ECO-02',
+    id: 'DEF-456',
+    nombre: 'DEF-456',
     ruta: 'Ruta Jr. de la Unión',
     color: '#EF9F27',
     estado: 'proximo',
@@ -238,8 +241,8 @@ var listaCamiones = [
     ]
   },
   {
-    id: 'ECO-03',
-    nombre: 'ECO-03',
+    id: 'GHI-789',
+    nombre: 'GHI-789',
     ruta: 'Ruta Miraflores Norte',
     color: '#378add',
     estado: 'activo',
@@ -250,8 +253,8 @@ var listaCamiones = [
     ]
   },
   {
-    id: 'ECO-04',
-    nombre: 'ECO-04',
+    id: 'JKL-012',
+    nombre: 'JKL-012',
     ruta: 'Ruta San Isidro',
     color: '#7f77dd',
     estado: 'completo',
@@ -407,10 +410,10 @@ window.enfocarCamion = function(id) {
 
 /* Mensajes de respaldo cuando el servidor no está disponible */
 var mensajesRespaldo = [
-  'ECO-02 se acerca al Jr. de la Unión. ¡Tenga sus residuos listos!',
-  'ECO-01 cubrió 3 cuadras en la última hora.',
-  'ECO-03 tiene retraso de ~8 min en Ruta Norte.',
-  'ECO-02 llegará a Av. Emancipación en ~4 min.'
+  'DEF-456 se acerca al Jr. de la Unión. ¡Tenga sus residuos listos!',
+  'ABC-123 cubrió 3 cuadras en la última hora en el Centro Histórico.',
+  'GHI-789 tiene retraso de ~8 min en Ruta Miraflores Norte.',
+  'DEF-456 llegará a Av. Emancipación en ~4 min.'
 ];
 
 var indiceRespaldo = 0;
@@ -548,48 +551,74 @@ document.querySelectorAll('.aparece-arriba').forEach(function(elemento) {
    13. CARGAR CAMIONES DESDE LA BASE DE DATOS
    ══════════════════════════════════════ */
 
-/* Colores asignados a cada camión según su id */
+/* ══════════════════════════════════════
+   13. CARGAR CAMIONES DESDE LA BASE DE DATOS
+   Si Supabase tiene datos reales los usa,
+   manteniendo los puntosRuta simulados para
+   que la animación de movimiento siga funcionando.
+   ══════════════════════════════════════ */
+
 var coloresCamiones = ['#1D9E75', '#EF9F27', '#378add', '#7f77dd', '#e24b4a', '#9FE1CB'];
 
-/* Carga los camiones reales desde el backend y los muestra en el mapa.
-   Si el backend no está disponible, mantiene los datos simulados. */
+/* Rutas simuladas de respaldo para cada camión real de Supabase */
+var rutasSimuladas = {
+  'ABC-123': [
+    [-12.0450, -77.0300], [-12.0460, -77.0320], [-12.0475, -77.0340],
+    [-12.0490, -77.0360], [-12.0505, -77.0345], [-12.0515, -77.0325],
+    [-12.0500, -77.0310], [-12.0480, -77.0295], [-12.0450, -77.0300]
+  ],
+  'DEF-456': [
+    [-12.0530, -77.0280], [-12.0545, -77.0300], [-12.0560, -77.0320],
+    [-12.0575, -77.0340], [-12.0560, -77.0360], [-12.0540, -77.0350],
+    [-12.0525, -77.0330], [-12.0515, -77.0310], [-12.0530, -77.0280]
+  ],
+  'GHI-789': [
+    [-12.0410, -77.0380], [-12.0420, -77.0400], [-12.0440, -77.0420],
+    [-12.0460, -77.0410], [-12.0470, -77.0390], [-12.0455, -77.0370],
+    [-12.0435, -77.0360], [-12.0410, -77.0380]
+  ],
+  'JKL-012': [
+    [-12.0380, -77.0250], [-12.0395, -77.0270], [-12.0415, -77.0260],
+    [-12.0430, -77.0240], [-12.0420, -77.0220], [-12.0400, -77.0230],
+    [-12.0380, -77.0250]
+  ]
+};
+
 async function cargarCamionesDesdeServidor() {
   try {
     var respuesta = await fetch(URL_BACKEND + '/api/camiones');
-
     if (!respuesta.ok) return;
 
     var datos = await respuesta.json();
-
     if (!datos.ok || datos.camiones.length === 0) return;
 
-    /* Limpiar los marcadores simulados del mapa */
+    /* Limpiar marcadores actuales del mapa */
     listaCamiones.forEach(function(c) {
       if (c._marcador) mapa.removeLayer(c._marcador);
     });
 
-    /* Reemplazar con los datos reales del servidor */
+    /* Reconstruir la lista usando datos reales de Supabase
+       pero manteniendo los puntosRuta para la animación */
     listaCamiones = datos.camiones.map(function(c, indice) {
+      var placa       = c.placa;
+      var puntosRuta  = rutasSimuladas[placa] || rutasSimuladas['ABC-123'];
+      var estadoRuta  = c.estado_mantenimiento === 'operativo' ? 'activo' : 'completo';
+
       return {
-        id:     c.placa,
-        nombre: c.placa,
-        ruta:   c.nombre_ruta || 'Sin ruta asignada',
-        color:  coloresCamiones[indice % coloresCamiones.length],
-        estado: c.estado_ruta === 'activa' ? 'activo' : 'completo',
-        latitud:  parseFloat(c.latitud)  || -12.046374,
-        longitud: parseFloat(c.longitud) || -77.042793,
-        /* Sin puntos de ruta: el marcador se posiciona por GPS real */
-        puntosRuta: [
-          [parseFloat(c.latitud) || -12.046374, parseFloat(c.longitud) || -77.042793]
-        ]
+        id:         placa,
+        nombre:     placa,
+        ruta:       c.nombre_ruta || 'Sin ruta asignada',
+        color:      coloresCamiones[indice % coloresCamiones.length],
+        estado:     estadoRuta,
+        puntosRuta: puntosRuta,
+        _indicePunto: 0,
+        _progreso:    0
       };
     });
 
-    /* Colocar marcadores en las posiciones GPS reales */
+    /* Colocar marcadores en el primer punto de cada ruta */
     listaCamiones.forEach(function(camion) {
-      camion._indicePunto = 0;
-      camion._progreso    = 0;
-      camion._marcador    = L.marker([camion.latitud, camion.longitud], {
+      camion._marcador = L.marker(camion.puntosRuta[0], {
         icon: crearIconoCamion(camion.color, camion.nombre)
       })
         .bindPopup(
@@ -600,19 +629,17 @@ async function cargarCamionesDesdeServidor() {
         .addTo(mapa);
     });
 
-    /* Actualizar el panel lateral con los camiones reales */
+    /* Actualizar el panel lateral */
     renderizarListaCamiones();
-
-    console.log('Camiones cargados desde el servidor: ' + listaCamiones.length);
+    console.log('Camiones cargados desde Supabase: ' + listaCamiones.length);
 
   } catch (error) {
-    /* Si el servidor no responde, se mantienen los datos simulados */
     console.log('Backend no disponible. Usando datos simulados.');
   }
 }
 
-/* Intentar cargar camiones reales al iniciar */
+/* Cargar camiones al iniciar la página */
 cargarCamionesDesdeServidor();
 
-/* Actualizar posiciones desde el servidor cada 10 segundos */
-setInterval(cargarCamionesDesdeServidor, 10000);
+/* Actualizar desde el servidor cada 30 segundos */
+setInterval(cargarCamionesDesdeServidor, 30000);
