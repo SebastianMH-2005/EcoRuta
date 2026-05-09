@@ -1,24 +1,43 @@
 /* ═══════════════════════════════════════════════════════
-   EcoRuta Conectada — aplicacion.js
-   Lógica principal: mapa, camiones, alertas, login
+   EcoRuta Conectada — EcoJava.js
+   Lógica principal: mapa, camiones, alertas, login, registro
    ═══════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════
-   1. MODAL DE INICIO DE SESIÓN
+   1. MODAL DE INICIO DE SESIÓN Y REGISTRO
    ══════════════════════════════════════ */
 
-var fondoModal       = document.getElementById('fondoModal');
-var botonAbrir       = document.getElementById('botonAbrirLogin');
-var botonCerrar      = document.getElementById('botonCerrarLogin');
-var botonIngresar    = document.getElementById('botonIngresar');
-var campoCorreo      = document.getElementById('campoCorreo');
-var campoContrasena  = document.getElementById('campoContrasena');
-var mensajeError     = document.getElementById('mensajeError');
-var textoError       = document.getElementById('textoError');
-var botonOjo         = document.getElementById('botonMostrarClave');
-var iconoOjo         = document.getElementById('iconoOjo');
+/* Referencias del modal */
+var fondoModal        = document.getElementById('fondoModal');
+var botonAbrir        = document.getElementById('botonAbrirLogin');
+var botonCerrar       = document.getElementById('botonCerrarLogin');
+var subtituloModal    = document.getElementById('subtituloModal');
 
-/* Abrir el modal al hacer clic en el botón del navbar */
+/* Referencias del login */
+var vistaLogin        = document.getElementById('vistaLogin');
+var botonIngresar     = document.getElementById('botonIngresar');
+var campoCorreo       = document.getElementById('campoCorreo');
+var campoContrasena   = document.getElementById('campoContrasena');
+var mensajeError      = document.getElementById('mensajeError');
+var textoError        = document.getElementById('textoError');
+var botonOjo          = document.getElementById('botonMostrarClave');
+var iconoOjo          = document.getElementById('iconoOjo');
+var botonIrRegistro   = document.getElementById('botonIrRegistro');
+
+/* Referencias del registro */
+var vistaRegistro     = document.getElementById('vistaRegistro');
+var botonRegistrarse  = document.getElementById('botonRegistrarse');
+var campoNombreReg    = document.getElementById('campoNombreReg');
+var campoCorreoReg    = document.getElementById('campoCorreoReg');
+var campoContrasenaReg= document.getElementById('campoContrasenaReg');
+var campoConfirmarReg = document.getElementById('campoConfirmarReg');
+var mensajeErrorReg   = document.getElementById('mensajeErrorReg');
+var textoErrorReg     = document.getElementById('textoErrorReg');
+var botonOjoReg       = document.getElementById('botonOjoReg');
+var iconoOjoReg       = document.getElementById('iconoOjoReg');
+var botonIrLogin      = document.getElementById('botonIrLogin');
+
+/* Abrir el modal mostrando el login por defecto */
 botonAbrir.addEventListener('click', abrirModal);
 
 /* Cerrar el modal con el botón X */
@@ -45,17 +64,62 @@ function cerrarModal() {
   fondoModal.classList.remove('activo');
   document.body.style.overflow = '';
   mensajeError.classList.remove('visible');
-  campoContrasena.value = '';
+  mensajeErrorReg.classList.remove('visible');
+  campoContrasena.value    = '';
+  campoNombreReg.value     = '';
+  campoCorreoReg.value     = '';
+  campoContrasenaReg.value = '';
+  campoConfirmarReg.value  = '';
+  mostrarVistaLogin();
 }
 
-/* Mostrar u ocultar la contraseña con el botón del ojo */
+/* Cambiar a la vista de registro */
+function mostrarVistaRegistro() {
+  vistaLogin.style.display    = 'none';
+  vistaRegistro.style.display = 'flex';
+  subtituloModal.textContent  = 'Crea tu cuenta gratuita';
+  mensajeError.classList.remove('visible');
+}
+
+/* Cambiar a la vista de login */
+function mostrarVistaLogin() {
+  vistaRegistro.style.display = 'none';
+  vistaLogin.style.display    = 'flex';
+  subtituloModal.textContent  = 'Ingresa a tu cuenta para continuar';
+  mensajeErrorReg.classList.remove('visible');
+}
+
+/* Botón "Crear cuenta gratis" → ir a registro */
+botonIrRegistro.addEventListener('click', function(e) {
+  e.preventDefault();
+  mostrarVistaRegistro();
+});
+
+/* Botón "Iniciar sesión" en vista registro → volver al login */
+botonIrLogin.addEventListener('click', function(e) {
+  e.preventDefault();
+  mostrarVistaLogin();
+});
+
+/* Mostrar u ocultar contraseña en login */
 botonOjo.addEventListener('click', function() {
   if (campoContrasena.type === 'password') {
-    campoContrasena.type = 'text';
-    iconoOjo.className = 'bi bi-eye-slash-fill';
+    campoContrasena.type  = 'text';
+    iconoOjo.className    = 'bi bi-eye-slash-fill';
   } else {
-    campoContrasena.type = 'password';
-    iconoOjo.className = 'bi bi-eye-fill';
+    campoContrasena.type  = 'password';
+    iconoOjo.className    = 'bi bi-eye-fill';
+  }
+});
+
+/* Mostrar u ocultar contraseña en registro */
+botonOjoReg.addEventListener('click', function() {
+  if (campoContrasenaReg.type === 'password') {
+    campoContrasenaReg.type = 'text';
+    iconoOjoReg.className   = 'bi bi-eye-slash-fill';
+  } else {
+    campoContrasenaReg.type = 'password';
+    iconoOjoReg.className   = 'bi bi-eye-fill';
   }
 });
 
@@ -186,6 +250,107 @@ campoContrasena.addEventListener('keydown', function(evento) {
 campoCorreo.addEventListener('keydown', function(evento) {
   if (evento.key === 'Enter') {
     campoContrasena.focus();
+  }
+});
+
+/* ══════════════════════════════════════
+   REGISTRO DE NUEVO USUARIO
+   ══════════════════════════════════════ */
+
+/* Muestra error en el formulario de registro */
+function mostrarErrorReg(mensaje) {
+  textoErrorReg.textContent        = mensaje;
+  mensajeErrorReg.style.background  = '';
+  mensajeErrorReg.style.borderColor = '';
+  mensajeErrorReg.style.color       = '';
+  mensajeErrorReg.classList.add('visible');
+}
+
+/* Muestra éxito en el formulario de registro */
+function mostrarExitoReg(mensaje) {
+  textoErrorReg.textContent        = mensaje;
+  mensajeErrorReg.style.background  = 'rgba(29,158,117,0.12)';
+  mensajeErrorReg.style.borderColor = 'rgba(29,158,117,0.35)';
+  mensajeErrorReg.style.color       = '#1D9E75';
+  mensajeErrorReg.classList.add('visible');
+}
+
+/* Bloquea o desbloquea el botón de registro */
+function cambiarEstadoBotoReg(cargando) {
+  botonRegistrarse.disabled    = cargando;
+  botonRegistrarse.textContent = cargando ? 'Creando cuenta...' : 'Crear cuenta';
+}
+
+/* Enviar registro al backend */
+botonRegistrarse.addEventListener('click', async function() {
+  var nombre     = campoNombreReg.value.trim();
+  var correo     = campoCorreoReg.value.trim();
+  var contrasena = campoContrasenaReg.value.trim();
+  var confirmar  = campoConfirmarReg.value.trim();
+
+  /* Validar que todos los campos estén llenos */
+  if (!nombre || !correo || !contrasena || !confirmar) {
+    mostrarErrorReg('Por favor completa todos los campos.');
+    return;
+  }
+
+  /* Validar formato del correo */
+  var formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!formatoCorreo.test(correo)) {
+    mostrarErrorReg('Ingresa un correo electrónico válido.');
+    return;
+  }
+
+  /* Validar largo mínimo de contraseña */
+  if (contrasena.length < 6) {
+    mostrarErrorReg('La contraseña debe tener al menos 6 caracteres.');
+    return;
+  }
+
+  /* Validar que las contraseñas coincidan */
+  if (contrasena !== confirmar) {
+    mostrarErrorReg('Las contraseñas no coinciden.');
+    return;
+  }
+
+  cambiarEstadoBotoReg(true);
+  mensajeErrorReg.classList.remove('visible');
+
+  try {
+    var respuesta = await fetch(URL_BACKEND + '/api/registro', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ nombre: nombre, correo: correo, contrasena: contrasena })
+    });
+
+    var datos = await respuesta.json();
+
+    if (datos.ok) {
+      /* Registro exitoso: mostrar mensaje y volver al login */
+      mostrarExitoReg('✓ Cuenta creada correctamente. Ahora puedes iniciar sesión.');
+      setTimeout(function() {
+        mostrarVistaLogin();
+        campoCorreo.value = correo;
+        campoContrasena.focus();
+      }, 2000);
+
+    } else {
+      mostrarErrorReg(datos.mensaje);
+    }
+
+  } catch (error) {
+    mostrarErrorReg('No se pudo conectar con el servidor. Intenta de nuevo.');
+    console.error('Error de registro:', error.message);
+
+  } finally {
+    cambiarEstadoBotoReg(false);
+  }
+});
+
+/* Enter en el campo confirmar contraseña dispara el registro */
+campoConfirmarReg.addEventListener('keydown', function(evento) {
+  if (evento.key === 'Enter') {
+    botonRegistrarse.click();
   }
 });
 
