@@ -163,13 +163,21 @@ function guardarSesion(token, nombre, rol) {
 
 /* Actualiza la interfaz del navbar cuando el usuario está autenticado */
 function actualizarNavbar(nombre) {
-  var botonNav = document.getElementById('botonAbrirLogin');
+  var botonNav          = document.getElementById('botonAbrirLogin');
+  var botonCerrarSesNav = document.getElementById('botonCerrarSesion');
+
   if (botonNav) {
-    botonNav.innerHTML = '<i class="bi bi-person-check-fill"></i> ' + nombre;
+    botonNav.innerHTML         = '<i class="bi bi-person-check-fill"></i> ' + nombre;
     botonNav.style.background  = 'rgba(29,158,117,0.2)';
     botonNav.style.borderColor = 'rgba(29,158,117,0.5)';
     botonNav.style.cursor      = 'default';
+    botonNav.style.display     = 'inline-flex';
     botonNav.removeEventListener('click', abrirModal);
+  }
+
+  /* Mostrar botón de cerrar sesión */
+  if (botonCerrarSesNav) {
+    botonCerrarSesNav.style.display = 'inline-flex';
   }
 }
 
@@ -808,3 +816,135 @@ cargarCamionesDesdeServidor();
 
 /* Actualizar desde el servidor cada 30 segundos */
 setInterval(cargarCamionesDesdeServidor, 30000);
+
+/* ══════════════════════════════════════
+   14. CERRAR SESIÓN
+   ══════════════════════════════════════ */
+
+var botonCerrarSesion = document.getElementById('botonCerrarSesion');
+
+/* Cierra la sesión del usuario: borra el token y restaura el navbar */
+function cerrarSesion() {
+  localStorage.removeItem('eco_token');
+  localStorage.removeItem('eco_nombre');
+  localStorage.removeItem('eco_rol');
+
+  /* Restaurar botón de iniciar sesión */
+  var botonNav = document.getElementById('botonAbrirLogin');
+  if (botonNav) {
+    botonNav.innerHTML  = '<i class="bi bi-person-fill"></i> Iniciar sesión';
+    botonNav.style.background  = '';
+    botonNav.style.borderColor = '';
+    botonNav.style.cursor      = '';
+    botonNav.style.display     = 'inline-flex';
+    botonNav.addEventListener('click', abrirModal);
+  }
+
+  /* Ocultar botón de cerrar sesión */
+  if (botonCerrarSesion) {
+    botonCerrarSesion.style.display = 'none';
+  }
+
+  /* Ocultar contador de alertas si existe */
+  var contador = document.getElementById('contadorAlertas');
+  if (contador) contador.remove();
+
+  console.log('Sesión cerrada correctamente.');
+}
+
+if (botonCerrarSesion) {
+  botonCerrarSesion.addEventListener('click', function() {
+    cerrarSesion();
+  });
+}
+
+/* ══════════════════════════════════════
+   15. SOLICITUD DE CAMIÓN
+   ══════════════════════════════════════ */
+
+var botonEnviarSolicitud = document.getElementById('botonEnviarSolicitud');
+var mensajeSolicitud     = document.getElementById('mensajeSolicitud');
+var textoSolicitud       = document.getElementById('textoSolicitud');
+
+/* Muestra mensaje de resultado en el formulario de solicitud */
+function mostrarResultadoSolicitud(mensaje, esExito) {
+  textoSolicitud.textContent = mensaje;
+  if (esExito) {
+    mensajeSolicitud.style.background  = 'rgba(29,158,117,0.12)';
+    mensajeSolicitud.style.borderColor = 'rgba(29,158,117,0.35)';
+    mensajeSolicitud.style.color       = '#1D9E75';
+  } else {
+    mensajeSolicitud.style.background  = '';
+    mensajeSolicitud.style.borderColor = '';
+    mensajeSolicitud.style.color       = '';
+  }
+  mensajeSolicitud.classList.add('visible');
+}
+
+if (botonEnviarSolicitud) {
+  botonEnviarSolicitud.addEventListener('click', async function() {
+
+    /* Verificar que el usuario está autenticado */
+    var token = localStorage.getItem('eco_token');
+    if (!token) {
+      mostrarResultadoSolicitud('Debes iniciar sesión para enviar una solicitud.', false);
+      setTimeout(function() { abrirModal(); }, 1500);
+      return;
+    }
+
+    /* Obtener datos del formulario */
+    var direccion   = (document.getElementById('solicitudDireccion')  || {}).value || '';
+    var distrito    = (document.getElementById('solicitudDistrito')    || {}).value || '';
+    var tipo        = (document.getElementById('solicitudTipo')        || {}).value || 'general';
+    var descripcion = (document.getElementById('solicitudDescripcion') || {}).value || '';
+
+    if (!direccion.trim()) {
+      mostrarResultadoSolicitud('Por favor ingresa tu dirección.', false);
+      return;
+    }
+
+    /* Construir referencia combinando distrito y descripción */
+    var referencia = '';
+    if (distrito)    referencia += 'Distrito: ' + distrito + '. ';
+    if (descripcion) referencia += descripcion;
+
+    botonEnviarSolicitud.disabled    = true;
+    botonEnviarSolicitud.textContent = 'Enviando...';
+    mensajeSolicitud.classList.remove('visible');
+
+    try {
+      var respuesta = await fetch(URL_BACKEND + '/api/solicitud-camion', {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          direccion:    direccion + (distrito ? ', ' + distrito : ''),
+          referencia:   referencia,
+          tipo_residuo: tipo
+        })
+      });
+
+      var datos = await respuesta.json();
+
+      if (datos.ok) {
+        mostrarResultadoSolicitud('✓ ' + datos.mensaje, true);
+        /* Limpiar formulario */
+        if (document.getElementById('solicitudDireccion'))  document.getElementById('solicitudDireccion').value  = '';
+        if (document.getElementById('solicitudDistrito'))   document.getElementById('solicitudDistrito').value   = '';
+        if (document.getElementById('solicitudDescripcion'))document.getElementById('solicitudDescripcion').value = '';
+      } else {
+        mostrarResultadoSolicitud(datos.mensaje, false);
+      }
+
+    } catch (error) {
+      mostrarResultadoSolicitud('No se pudo conectar con el servidor. Intenta de nuevo.', false);
+      console.error('Error al enviar solicitud:', error.message);
+
+    } finally {
+      botonEnviarSolicitud.disabled    = false;
+      botonEnviarSolicitud.innerHTML   = '<i class="bi bi-send-fill"></i> Enviar solicitud';
+    }
+  });
+}

@@ -19,7 +19,8 @@ app.use(cors({
   origin: [
     'https://eco-ruta-hhd4.vercel.app',
     'http://localhost:3000',
-    'http://127.0.0.1:5500'
+    'http://127.0.0.1:5500',
+    'http://localhost:5500'
   ],
   credentials: true
 }));
@@ -65,6 +66,21 @@ app.post('/api/registro', async function(req, res) {
     return res.status(400).json({ ok: false, mensaje: 'Todos los campos son obligatorios.' });
   }
 
+  // Validación estricta del formato de correo
+  // Solo acepta formatos como usuario@dominio.com o usuario@dominio.com.pe
+  // Rechaza: .com.feliz, .feliz, dominios inventados de más de 4 letras
+  var formatoCorreo = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}$/;
+  if (!formatoCorreo.test(correo)) {
+    return res.status(400).json({ ok: false, mensaje: 'Ingresa un correo electrónico válido.' });
+  }
+
+  // Rechazar correos con más de un punto seguido al final (ej: .com.feliz)
+  var dominioPartes = correo.split('@')[1].split('.');
+  var extension     = dominioPartes[dominioPartes.length - 1];
+  if (extension.length > 4 || dominioPartes.length > 3) {
+    return res.status(400).json({ ok: false, mensaje: 'El dominio del correo no es válido.' });
+  }
+
   // Validar largo mínimo de contraseña
   if (contrasena.length < 6) {
     return res.status(400).json({ ok: false, mensaje: 'La contraseña debe tener al menos 6 caracteres.' });
@@ -81,7 +97,21 @@ app.post('/api/registro', async function(req, res) {
       [nombre, correo, hash]
     );
 
-    res.status(201).json({ ok: true, usuario: resultado.rows[0] });
+    var nuevoUsuario = resultado.rows[0];
+
+    // Simular correo de bienvenida (se imprime en el log del servidor)
+    // Cuando se integre Resend o SendGrid, aquí se envía el correo real
+    console.log('');
+    console.log('  ✉ Correo de bienvenida para: ' + correo);
+    console.log('  Asunto: ¡Bienvenido a EcoRuta Conectada, ' + nombre + '!');
+    console.log('  Mensaje: Gracias por unirte. Ya puedes rastrear los camiones en tu zona.');
+    console.log('');
+
+    res.status(201).json({
+      ok: true,
+      usuario: nuevoUsuario,
+      mensaje: '¡Cuenta creada! Te enviamos un correo de bienvenida.'
+    });
 
   } catch (error) {
     // El error 23505 en PostgreSQL es de clave duplicada (correo ya existe)
@@ -368,6 +398,58 @@ app.put('/api/perfil/ubicacion', verificarToken, async function(req, res) {
   } catch (error) {
     console.error('Error al actualizar ubicación:', error.message);
     res.status(500).json({ ok: false, mensaje: 'Error al actualizar la ubicación.' });
+  }
+});
+
+
+// ═══════════════════════════════════════════════════════
+//  RUTA DE SOLICITUD DE CAMIÓN
+// ═══════════════════════════════════════════════════════
+
+// ─── POST /api/solicitud-camion ──────────────────────────────
+// El vecino autenticado solicita que un camión pase por su zona.
+// Guarda la solicitud como una notificación especial para la municipalidad.
+// Recibe: direccion, referencia, tipo_residuo
+app.post('/api/solicitud-camion', verificarToken, async function(req, res) {
+  var { direccion, referencia, tipo_residuo } = req.body;
+
+  if (!direccion) {
+    return res.status(400).json({ ok: false, mensaje: 'La dirección es obligatoria.' });
+  }
+
+  try {
+    // Obtener nombre del usuario que hace la solicitud
+    var usuario = await pool.query(
+      'SELECT nombre, correo FROM usuario WHERE id_usuario = $1',
+      [req.usuario.id]
+    );
+
+    var nombreUsuario = usuario.rows[0] ? usuario.rows[0].nombre : 'Vecino';
+    var tipoRes       = tipo_residuo || 'general';
+    var ref           = referencia   || 'Sin referencia adicional';
+
+    var mensaje =
+      '🚛 SOLICITUD DE CAMIÓN — ' + nombreUsuario + ' solicita recolección en: ' +
+      direccion + '. Referencia: ' + ref + '. Tipo de residuo: ' + tipoRes + '.';
+
+    // Guardar la solicitud en la tabla notificacion
+    // (id_camion NULL porque aún no hay camión asignado)
+    await pool.query(
+      `INSERT INTO notificacion (id_usuario, id_camion, mensaje)
+       VALUES ($1, NULL, $2)`,
+      [req.usuario.id, mensaje]
+    );
+
+    console.log('  📍 Solicitud de camión recibida de: ' + nombreUsuario + ' → ' + direccion);
+
+    res.json({
+      ok: true,
+      mensaje: '¡Solicitud enviada! La municipalidad revisará tu pedido pronto.'
+    });
+
+  } catch (error) {
+    console.error('Error al guardar solicitud:', error.message);
+    res.status(500).json({ ok: false, mensaje: 'Error al enviar la solicitud.' });
   }
 });
 
