@@ -179,6 +179,15 @@ function actualizarNavbar(nombre) {
   if (botonCerrarSesNav) {
     botonCerrarSesNav.style.display = 'inline-flex';
   }
+
+  /* Mostrar secciones que requieren login */
+  var seccionSolicitud = document.getElementById('solicitud');
+  var seccionPanel     = document.getElementById('panel-usuario');
+  if (seccionSolicitud) seccionSolicitud.style.display = 'block';
+  if (seccionPanel)     seccionPanel.style.display     = 'block';
+
+  /* Cargar historial de notificaciones */
+  cargarHistorialNotificaciones();
 }
 
 /* Referencia a la función para poder removerla del evento */
@@ -849,14 +858,169 @@ function cerrarSesion() {
   var contador = document.getElementById('contadorAlertas');
   if (contador) contador.remove();
 
+  /* Ocultar secciones que requieren login */
+  var seccionSolicitud = document.getElementById('solicitud');
+  var seccionPanel     = document.getElementById('panel-usuario');
+  if (seccionSolicitud) seccionSolicitud.style.display = 'none';
+  if (seccionPanel)     seccionPanel.style.display     = 'none';
+
+  /* Limpiar historial */
+  limpiarHistorial();
+
   console.log('Sesión cerrada correctamente.');
 }
 
 if (botonCerrarSesion) {
   botonCerrarSesion.addEventListener('click', function() {
     cerrarSesion();
+    limpiarHistorial();
   });
 }
+
+/* ══════════════════════════════════════
+   16. HISTORIAL DE NOTIFICACIONES
+   ══════════════════════════════════════ */
+
+var historialContenedor = document.getElementById('historial-notificaciones');
+var conteoNotificaciones = document.getElementById('conteo-notificaciones');
+
+function limpiarHistorial() {
+  if (historialContenedor) {
+    historialContenedor.innerHTML =
+      '<div class="historial-vacio">' +
+        '<i class="bi bi-bell-slash"></i>' +
+        '<p>Inicia sesión para ver tus notificaciones.</p>' +
+      '</div>';
+  }
+  if (conteoNotificaciones) conteoNotificaciones.textContent = '—';
+}
+
+async function cargarHistorialNotificaciones() {
+  var token = localStorage.getItem('eco_token');
+  if (!token || !historialContenedor) return;
+
+  try {
+    var respuesta = await fetch(URL_BACKEND + '/api/notificaciones', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var datos = await respuesta.json();
+
+    if (!datos.ok || datos.notificaciones.length === 0) {
+      historialContenedor.innerHTML =
+        '<div class="historial-vacio">' +
+          '<i class="bi bi-bell-slash"></i>' +
+          '<p>No tienes notificaciones aún. Activa tu ubicación para recibir alertas.</p>' +
+        '</div>';
+      if (conteoNotificaciones) conteoNotificaciones.textContent = '0 alertas';
+      return;
+    }
+
+    var noLeidas = datos.notificaciones.filter(function(n) { return !n.leida; }).length;
+    if (conteoNotificaciones) {
+      conteoNotificaciones.textContent = datos.notificaciones.length + ' alertas · ' + noLeidas + ' sin leer';
+    }
+
+    historialContenedor.innerHTML = datos.notificaciones.map(function(n) {
+      var fecha = new Date(n.fecha_hora);
+      var horaTexto = fecha.toLocaleDateString('es-PE', { day:'2-digit', month:'short' }) +
+                      ' · ' + fecha.toLocaleTimeString('es-PE', { hour:'2-digit', minute:'2-digit' });
+      return (
+        '<div class="item-notificacion ' + (n.leida ? '' : 'no-leida') + '">' +
+          '<div class="notif-ícono-hist">🚛</div>' +
+          '<div class="notif-contenido">' +
+            '<div class="notif-mensaje-hist">' + n.mensaje + '</div>' +
+            '<div class="notif-hora-hist">' + horaTexto + (n.camion_placa ? ' · ' + n.camion_placa : '') + '</div>' +
+          '</div>' +
+          (!n.leida ? '<div class="notif-punto-nuevo"></div>' : '') +
+        '</div>'
+      );
+    }).join('');
+
+  } catch (error) {
+    console.error('Error al cargar historial:', error.message);
+  }
+}
+
+/* Cargar historial cada 30 segundos si hay sesión */
+setInterval(function() {
+  if (localStorage.getItem('eco_token')) cargarHistorialNotificaciones();
+}, 30000);
+
+/* ══════════════════════════════════════
+   17. SISTEMA DE CALIFICACIÓN
+   ══════════════════════════════════════ */
+
+var estrellas            = document.querySelectorAll('.estrella');
+var textoCalificacion    = document.getElementById('texto-calificacion');
+var botonCalificacion    = document.getElementById('botonEnviarCalificacion');
+var valorCalificacion    = 0;
+
+var textosEstrellas = ['', 'Muy malo', 'Malo', 'Regular', 'Bueno', '¡Excelente!'];
+
+estrellas.forEach(function(estrella) {
+  estrella.addEventListener('mouseover', function() {
+    var val = parseInt(this.dataset.valor);
+    estrellas.forEach(function(e) {
+      e.classList.toggle('activa', parseInt(e.dataset.valor) <= val);
+    });
+    if (textoCalificacion) textoCalificacion.textContent = textosEstrellas[val];
+  });
+
+  estrella.addEventListener('mouseout', function() {
+    estrellas.forEach(function(e) {
+      e.classList.toggle('activa', parseInt(e.dataset.valor) <= valorCalificacion);
+    });
+    if (textoCalificacion) {
+      textoCalificacion.textContent = valorCalificacion > 0
+        ? textosEstrellas[valorCalificacion]
+        : 'Selecciona una puntuación';
+    }
+  });
+
+  estrella.addEventListener('click', function() {
+    valorCalificacion = parseInt(this.dataset.valor);
+    if (botonCalificacion) botonCalificacion.style.display = 'flex';
+    if (textoCalificacion) textoCalificacion.textContent = textosEstrellas[valorCalificacion];
+  });
+});
+
+if (botonCalificacion) {
+  botonCalificacion.addEventListener('click', function() {
+    var token = localStorage.getItem('eco_token');
+    if (!token) {
+      alert('Inicia sesión para enviar tu calificación.');
+      return;
+    }
+    if (textoCalificacion) {
+      textoCalificacion.textContent = '✓ ¡Gracias por tu calificación de ' + valorCalificacion + ' estrella' + (valorCalificacion > 1 ? 's' : '') + '!';
+      textoCalificacion.style.color = 'var(--color-verde)';
+    }
+    botonCalificacion.style.display = 'none';
+    valorCalificacion = 0;
+    estrellas.forEach(function(e) { e.classList.remove('activa'); });
+  });
+}
+
+/* ══════════════════════════════════════
+   18. FAQ — ACORDEÓN
+   ══════════════════════════════════════ */
+
+document.querySelectorAll('.faq-pregunta').forEach(function(boton) {
+  boton.addEventListener('click', function() {
+    var item = this.closest('.faq-item');
+    var estaAbierto = item.classList.contains('abierto');
+
+    /* Cerrar todos los items abiertos */
+    document.querySelectorAll('.faq-item.abierto').forEach(function(i) {
+      i.classList.remove('abierto');
+    });
+
+    /* Abrir el clickeado si estaba cerrado */
+    if (!estaAbierto) {
+      item.classList.add('abierto');
+    }
+  });
+});
 
 /* ══════════════════════════════════════
    15. SOLICITUD DE CAMIÓN

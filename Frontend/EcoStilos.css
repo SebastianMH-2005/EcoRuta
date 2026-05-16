@@ -1346,3 +1346,698 @@ section {
   #contenedor-mapa   { height: 360px; }
   .panel-control-mapa { margin-top: 1.5rem; }
 }
+
+/* ═══════════════════════════════════════════
+   SECCIÓN SOLICITUD DE CAMIÓN
+   ═══════════════════════════════════════════ */
+.seccion-solicitud {
+  background: var(--color-fondo);
+  padding: 5rem 0;
+}
+
+/* Tarjeta del formulario de solicitud */
+.tarjeta-formulario-solicitud {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 2rem;
+}
+
+/* Select input con el mismo estilo que los campos de texto */
+.entrada-campo select,
+select.entrada-campo {
+  background: rgba(29, 158, 117, 0.06);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  color: var(--color-texto);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237ab89e' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+select.entrada-campo:focus {
+  border-color: rgba(29, 158, 117, 0.5);
+  background-color: rgba(29, 158, 117, 0.1);
+}
+
+select.entrada-campo option {
+  background: var(--color-tarjeta);
+  color: var(--color-texto);
+}
+
+/* Textarea con el mismo estilo */
+textarea.entrada-campo {
+  padding-top: 0.7rem;
+  line-height: 1.6;
+}
+
+/* Tarjeta informativa lateral */
+.tarjeta-info-solicitud {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 1.8rem;
+  height: 100%;
+}
+
+/* Paso del proceso de solicitud */
+.paso-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+/* Número del paso */
+.numero-paso-info {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(29, 158, 117, 0.15);
+  border: 1px solid rgba(29, 158, 117, 0.3);
+  color: var(--color-verde);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Aviso de que requiere login */
+.aviso-login-solicitud {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(29, 158, 117, 0.08);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  padding: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--color-atenuado);
+  margin-top: 1.5rem;
+  line-height: 1.55;
+}
+
+/* Sección bloqueada para usuarios no autenticados */
+.seccion-bloqueada-login {
+  background: var(--color-fondo);
+  padding: 5rem 0;
+}
+
+.tarjeta-requiere-login {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.tarjeta-requiere-login h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-texto);
+  margin: 1rem 0 0.6rem;
+}
+
+.tarjeta-requiere-login p {
+  font-size: 0.9rem;
+  color: var(--color-atenuado);
+  margin-bottom: 1.5rem;
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════
+   SECCIÓN SOLICITUD DE CAMIÓN
+   ═══════════════════════════════════════════ */
+.seccion-solicitud {
+  background: var(--color-fondo);
+}
+
+/* Formulario de solicitud */
+.tarjeta-formulario-solicitud {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 2rem;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.tarjeta-formulario-solicitud::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-verde), transparent);
+}
+
+/* Panel informativo de solicitud */
+.tarjeta-info-solicitud {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 2rem;
+  height: 100%;
+}
+
+/* Paso numerado en el panel informativo */
+.paso-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+.numero-paso-info {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--color-verde);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Aviso de login requerido en la solicitud */
+.aviso-login-solicitud {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(29, 158, 117, 0.08);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  padding: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--color-atenuado);
+  margin-top: 1.5rem;
+  line-height: 1.55;
+}
+
+/* Select con estilo del proyecto */
+.entrada-campo[type="select"],
+select.entrada-campo {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237ab89e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+select.entrada-campo option {
+  background: var(--color-tarjeta);
+  color: var(--color-texto);
+}
+
+textarea.entrada-campo {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* ═══════════════════════════════════════════
+   PANEL DE USUARIO — HISTORIAL DE NOTIFICACIONES
+   ═══════════════════════════════════════════ */
+.seccion-panel-usuario {
+  background: var(--color-superficie);
+}
+
+/* Tarjeta del panel de usuario */
+.tarjeta-panel-usuario {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 1.8rem;
+}
+
+/* Encabezado del panel */
+.panel-usuario-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.panel-usuario-cabecera h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-texto);
+  margin: 0;
+}
+
+/* Item de notificación en el historial */
+.item-notificacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 1rem;
+  background: rgba(29, 158, 117, 0.05);
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  transition: background 0.2s;
+}
+
+.item-notificacion:hover {
+  background: rgba(29, 158, 117, 0.1);
+}
+
+.item-notificacion.no-leida {
+  border-color: rgba(29, 158, 117, 0.35);
+  background: rgba(29, 158, 117, 0.08);
+}
+
+.notif-ícono-hist {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notif-contenido { flex: 1; min-width: 0; }
+
+.notif-mensaje-hist {
+  font-size: 0.85rem;
+  color: var(--color-texto);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.notif-hora-hist {
+  font-size: 0.72rem;
+  color: var(--color-atenuado);
+}
+
+.notif-punto-nuevo {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-verde);
+  flex-shrink: 0;
+  margin-top: 6px;
+  animation: animacion-pulso 2s infinite;
+}
+
+/* Estado vacío del historial */
+.historial-vacio {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-atenuado);
+}
+
+.historial-vacio i {
+  font-size: 2.5rem;
+  color: rgba(29, 158, 117, 0.3);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.historial-vacio p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════
+   SECCIÓN PREGUNTAS FRECUENTES (FAQ)
+   ═══════════════════════════════════════════ */
+.seccion-faq {
+  background: var(--color-fondo);
+}
+
+/* Item de pregunta frecuente */
+.faq-item {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 14px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.faq-item:hover {
+  border-color: rgba(29, 158, 117, 0.4);
+}
+
+/* Botón de pregunta */
+.faq-pregunta {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  gap: 1rem;
+}
+
+.faq-pregunta-texto {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-texto);
+}
+
+.faq-icono {
+  color: var(--color-verde);
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: transform 0.25s;
+}
+
+.faq-item.abierto .faq-icono {
+  transform: rotate(45deg);
+}
+
+/* Respuesta de la pregunta */
+.faq-respuesta {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.faq-item.abierto .faq-respuesta {
+  max-height: 300px;
+}
+
+.faq-respuesta-texto {
+  padding: 0 1.4rem 1.2rem;
+  font-size: 0.875rem;
+  color: var(--color-atenuado);
+  line-height: 1.7;
+  border-top: 1px solid var(--color-borde);
+  padding-top: 1rem;
+  margin-top: 0;
+}
+
+/* ═══════════════════════════════════════════
+   SISTEMA DE CALIFICACIÓN
+   ═══════════════════════════════════════════ */
+.tarjeta-calificacion {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.estrellas-calificacion {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.estrella {
+  font-size: 2rem;
+  cursor: pointer;
+  color: var(--color-borde);
+  transition: color 0.15s, transform 0.15s;
+}
+
+.estrella:hover,
+.estrella.activa {
+  color: var(--color-acento);
+  transform: scale(1.2);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE ADICIONAL
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .tarjeta-formulario-solicitud,
+  .tarjeta-info-solicitud { padding: 1.4rem; }
+  .faq-pregunta-texto     { font-size: 0.875rem; }
+  .tarjeta-panel-usuario  { padding: 1.2rem; }
+}
+
+/* ═══════════════════════════════════════════
+   SECCIÓN SOLICITUD DE CAMIÓN
+   ═══════════════════════════════════════════ */
+.seccion-solicitud {
+  background: var(--color-superficie);
+  padding: 5rem 0;
+}
+
+.tarjeta-formulario-solicitud {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 2rem;
+}
+
+.tarjeta-info-solicitud {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 2rem;
+  height: 100%;
+}
+
+.paso-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+.numero-paso-info {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(29, 158, 117, 0.15);
+  border: 1px solid var(--color-verde);
+  color: var(--color-verde);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.aviso-login-solicitud {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(29, 158, 117, 0.07);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-top: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--color-atenuado);
+}
+
+/* ═══════════════════════════════════════════
+   PANEL DE USUARIO — HISTORIAL
+   ═══════════════════════════════════════════ */
+.seccion-panel-usuario {
+  background: var(--color-fondo);
+  padding: 5rem 0;
+}
+
+.tarjeta-panel-usuario {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 1.8rem;
+  min-height: 300px;
+}
+
+.panel-usuario-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.panel-usuario-cabecera h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-texto);
+  margin: 0;
+}
+
+/* Ítem individual de notificación en historial */
+.item-notificacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0.85rem;
+  border-radius: 12px;
+  margin-bottom: 0.6rem;
+  border: 1px solid transparent;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.item-notificacion:hover {
+  background: rgba(29, 158, 117, 0.06);
+}
+
+.item-notificacion.no-leida {
+  background: rgba(29, 158, 117, 0.08);
+  border-color: var(--color-borde);
+}
+
+.notif-ícono-hist {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notif-contenido { flex: 1; min-width: 0; }
+
+.notif-mensaje-hist {
+  font-size: 0.83rem;
+  color: var(--color-texto);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.notif-hora-hist {
+  font-size: 0.72rem;
+  color: var(--color-atenuado);
+}
+
+.notif-punto-nuevo {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-verde);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+/* Historial vacío */
+.historial-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: var(--color-atenuado);
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.historial-vacio i {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+
+.historial-vacio p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Tarjeta de calificación */
+.tarjeta-calificacion {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+  padding: 1.8rem;
+  text-align: center;
+  height: 100%;
+}
+
+/* ═══════════════════════════════════════════
+   FAQ — PREGUNTAS FRECUENTES
+   ═══════════════════════════════════════════ */
+.seccion-faq {
+  background: var(--color-superficie);
+  padding: 5rem 0;
+}
+
+.faq-item {
+  background: var(--color-tarjeta);
+  border: 1px solid var(--color-borde);
+  border-radius: 14px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.faq-item.abierto {
+  border-color: rgba(29, 158, 117, 0.4);
+}
+
+.faq-pregunta {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 1.1rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.faq-pregunta-texto {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-texto);
+}
+
+.faq-icono {
+  font-size: 1rem;
+  color: var(--color-verde);
+  transition: transform 0.3s;
+  flex-shrink: 0;
+}
+
+.faq-item.abierto .faq-icono {
+  transform: rotate(45deg);
+}
+
+.faq-respuesta {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.faq-item.abierto .faq-respuesta {
+  max-height: 300px;
+}
+
+.faq-respuesta-texto {
+  padding: 0 1.4rem 1.2rem;
+  font-size: 0.875rem;
+  color: var(--color-atenuado);
+  line-height: 1.7;
+  border-top: 1px solid var(--color-borde);
+  padding-top: 1rem;
+  margin: 0 1.4rem;
+}

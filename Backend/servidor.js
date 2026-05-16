@@ -8,11 +8,48 @@ const express              = require('express');
 const cors                 = require('cors');
 const bcrypt               = require('bcrypt');
 const jwt                  = require('jsonwebtoken');
+const { Resend }           = require('resend');
 const pool                 = require('./db');
 const iniciarSistemaAlertas = require('./alertas');
 require('dotenv').config();
 
-const app = express();
+const app    = express();
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+/* Envía el correo de bienvenida al usuario recién registrado */
+async function enviarCorreoBienvenida(nombre, correo) {
+  try {
+    await resend.emails.send({
+      from:    'EcoRuta Conectada <onboarding@resend.dev>',
+      to:      correo,
+      subject: '¡Bienvenido a EcoRuta Conectada, ' + nombre + '!',
+      html:
+        '<div style="font-family:sans-serif;max-width:520px;margin:0 auto;background:#0d1f1a;color:#e8f5f0;border-radius:16px;overflow:hidden;">' +
+          '<div style="background:#1D9E75;padding:2rem;text-align:center;">' +
+            '<h1 style="margin:0;font-size:1.8rem;font-weight:800;color:#fff;">EcoRuta Conectada</h1>' +
+            '<p style="margin:0.5rem 0 0;color:rgba(255,255,255,0.85);font-size:0.95rem;">Ciudades más limpias, vecinos más conectados</p>' +
+          '</div>' +
+          '<div style="padding:2rem;">' +
+            '<h2 style="color:#1D9E75;margin-top:0;">¡Hola, ' + nombre + '!</h2>' +
+            '<p style="color:#7ab89e;line-height:1.7;">Gracias por unirte a <strong style="color:#e8f5f0;">EcoRuta Conectada</strong>. Tu cuenta ha sido creada exitosamente.</p>' +
+            '<p style="color:#7ab89e;line-height:1.7;">Ahora puedes:</p>' +
+            '<ul style="color:#7ab89e;line-height:2;">' +
+              '<li>📍 Ver en tiempo real los camiones recolectores de tu zona</li>' +
+              '<li>🔔 Recibir alertas cuando el camión está cerca de tu calle</li>' +
+              '<li>🚛 Solicitar que un camión pase por tu zona</li>' +
+            '</ul>' +
+            '<div style="text-align:center;margin:2rem 0;">' +
+              '<a href="https://eco-ruta-hhd4.vercel.app" style="background:#1D9E75;color:#fff;padding:0.85rem 2rem;border-radius:10px;text-decoration:none;font-weight:700;font-size:1rem;">Ir a EcoRuta Conectada</a>' +
+            '</div>' +
+            '<p style="color:#7ab89e;font-size:0.8rem;margin-top:2rem;border-top:1px solid rgba(29,158,117,0.2);padding-top:1rem;">Si no creaste esta cuenta, puedes ignorar este correo.</p>' +
+          '</div>' +
+        '</div>'
+    });
+    console.log('  ✉ Correo de bienvenida enviado a: ' + correo);
+  } catch (error) {
+    console.error('  ✗ Error al enviar correo:', error.message);
+  }
+}
 
 // ─── Middlewares globales ────────────────────────────────────
 app.use(cors({
@@ -99,18 +136,13 @@ app.post('/api/registro', async function(req, res) {
 
     var nuevoUsuario = resultado.rows[0];
 
-    // Simular correo de bienvenida (se imprime en el log del servidor)
-    // Cuando se integre Resend o SendGrid, aquí se envía el correo real
-    console.log('');
-    console.log('  ✉ Correo de bienvenida para: ' + correo);
-    console.log('  Asunto: ¡Bienvenido a EcoRuta Conectada, ' + nombre + '!');
-    console.log('  Mensaje: Gracias por unirte. Ya puedes rastrear los camiones en tu zona.');
-    console.log('');
+    // Enviar correo de bienvenida real con Resend
+    await enviarCorreoBienvenida(nombre, correo);
 
     res.status(201).json({
       ok: true,
       usuario: nuevoUsuario,
-      mensaje: '¡Cuenta creada! Te enviamos un correo de bienvenida.'
+      mensaje: '¡Cuenta creada! Te enviamos un correo de bienvenida a ' + correo + '.'
     });
 
   } catch (error) {
