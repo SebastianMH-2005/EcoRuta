@@ -466,11 +466,19 @@ app.post('/api/solicitud-camion', verificarToken, async function(req, res) {
 
     // Guardar la solicitud en la tabla notificacion
     // (id_camion NULL porque aún no hay camión asignado)
-    await pool.query(
-      `INSERT INTO notificacion (id_usuario, id_camion, mensaje)
-       VALUES ($1, NULL, $2)`,
-      [req.usuario.id, mensaje]
-    );
+await pool.query(
+  `INSERT INTO solicitud_camion
+    (id_usuario, direccion, distrito, tipo_residuo, frecuencia, descripcion)
+   VALUES ($1, $2, $3, $4, $5, $6)`,
+  [
+    req.usuario.id,
+    direccion,
+    req.body.distrito    || null,
+    tipo_residuo         || 'general',
+    req.body.frecuencia  || 'diario',
+    referencia           || null
+  ]
+);
 
     console.log('  📍 Solicitud de camión recibida de: ' + nombreUsuario + ' → ' + direccion);
 
