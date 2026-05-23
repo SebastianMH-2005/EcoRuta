@@ -1115,3 +1115,100 @@ if (botonEnviarSolicitud) {
     }
   });
 }
+
+/* ══════════════════════════════════════
+   19. RECUPERAR CONTRASEÑA
+   ══════════════════════════════════════ */
+
+var botonIrRecuperar     = document.getElementById('botonIrRecuperar');
+var vistaRecuperar       = document.getElementById('vistaRecuperar');
+var botonEnviarRecuperar = document.getElementById('botonEnviarRecuperar');
+var campoCorreoRecuperar = document.getElementById('campoCorreoRecuperar');
+var mensajeRecuperar     = document.getElementById('mensajeRecuperar');
+var textoRecuperar       = document.getElementById('textoRecuperar');
+var botonVolverLogin     = document.getElementById('botonVolverLogin');
+
+function mostrarVistaRecuperar() {
+  vistaLogin.style.display    = 'none';
+  vistaRegistro.style.display = 'none';
+  if (vistaRecuperar) vistaRecuperar.style.display = 'flex';
+  if (subtituloModal) subtituloModal.textContent   = 'Recupera tu contraseña';
+}
+
+if (botonIrRecuperar) {
+  botonIrRecuperar.addEventListener('click', function(e) {
+    e.preventDefault();
+    mostrarVistaRecuperar();
+  });
+}
+
+if (botonVolverLogin) {
+  botonVolverLogin.addEventListener('click', function(e) {
+    e.preventDefault();
+    mostrarVistaLogin();
+  });
+}
+
+if (botonEnviarRecuperar) {
+  botonEnviarRecuperar.addEventListener('click', async function() {
+    var correo = campoCorreoRecuperar
+      ? campoCorreoRecuperar.value.trim() : '';
+
+    if (!correo) {
+      if (textoRecuperar) textoRecuperar.textContent = 'Ingresa tu correo.';
+      if (mensajeRecuperar) mensajeRecuperar.classList.add('visible');
+      return;
+    }
+
+    botonEnviarRecuperar.disabled    = true;
+    botonEnviarRecuperar.textContent = 'Enviando...';
+
+    try {
+      var resp = await fetch(URL_BACKEND + '/api/recuperar-contrasena', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ correo: correo })
+      });
+      var datos = await resp.json();
+
+      if (textoRecuperar) textoRecuperar.textContent = datos.mensaje;
+      if (mensajeRecuperar) {
+        mensajeRecuperar.style.background  = 'rgba(29,158,117,0.12)';
+        mensajeRecuperar.style.borderColor = 'rgba(29,158,117,0.35)';
+        mensajeRecuperar.style.color       = '#1D9E75';
+        mensajeRecuperar.classList.add('visible');
+      }
+    } catch (error) {
+      if (textoRecuperar) textoRecuperar.textContent = 'No se pudo conectar.';
+      if (mensajeRecuperar) mensajeRecuperar.classList.add('visible');
+    } finally {
+      botonEnviarRecuperar.disabled  = false;
+      botonEnviarRecuperar.innerHTML =
+        '<i class="bi bi-send-fill"></i> Enviar instrucciones';
+    }
+  });
+}
+
+/* ══════════════════════════════════════
+   20. CALIFICACIÓN — GUARDAR EN BD
+   ══════════════════════════════════════ */
+
+if (botonCalificacion) {
+  botonCalificacion.addEventListener('click', async function() {
+    var token = localStorage.getItem('eco_token');
+    if (!token || valorCalificacion === 0) return;
+
+    try {
+      await fetch(URL_BACKEND + '/api/calificacion', {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ puntuacion: valorCalificacion })
+      });
+    } catch (e) {
+      console.error('Error al guardar calificación:', e.message);
+    }
+  });
+}
