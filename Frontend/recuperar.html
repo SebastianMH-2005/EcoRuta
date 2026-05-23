@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Restablecer contraseña — EcoRuta Conectada</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --verde:    #1D9E75;
+      --verde-dk: #0F6E56;
+      --acento:   #EF9F27;
+      --rojo:     #e24b4a;
+      --fondo:    #0d1f1a;
+      --tarjeta:  #162620;
+      --borde:    rgba(29,158,117,0.18);
+      --texto:    #e8f5f0;
+      --atenuado: #7ab89e;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background-image:
+        linear-gradient(rgba(29,158,117,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29,158,117,0.05) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    .tarjeta {
+      background: var(--tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      overflow: hidden;
+    }
+    .tarjeta::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--verde), transparent);
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--verde);
+      text-align: center;
+      display: block;
+      text-decoration: none;
+      margin-bottom: 0.3rem;
+    }
+    .logo span { color: var(--acento); }
+    .subtitulo {
+      font-size: 0.85rem;
+      color: var(--atenuado);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .campo { margin-bottom: 1rem; }
+    .etiqueta {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--atenuado);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+    .entrada {
+      width: 100%;
+      background: rgba(29,158,117,0.06);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      color: var(--texto);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .entrada::placeholder { color: var(--atenuado); opacity: 0.6; }
+    .entrada:focus {
+      border-color: rgba(29,158,117,0.5);
+      background: rgba(29,158,117,0.1);
+    }
+    .contenedor-pass { position: relative; }
+    .contenedor-pass .entrada { padding-right: 2.8rem; }
+    .ojo {
+      position: absolute;
+      right: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--atenuado);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .ojo:hover { color: var(--verde); }
+    .mensaje {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      border-radius: 9px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .mensaje.error  { background: rgba(226,75,74,0.12); border: 1px solid rgba(226,75,74,0.3); color: var(--rojo); display: flex; }
+    .mensaje.exito  { background: rgba(29,158,117,0.12); border: 1px solid rgba(29,158,117,0.35); color: var(--verde); display: flex; }
+    .boton {
+      width: 100%;
+      background: var(--verde);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.8rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .boton:hover { background: var(--verde-dk); transform: translateY(-2px); }
+    .boton:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .enlace-volver {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: var(--atenuado);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .enlace-volver:hover { color: var(--verde); }
+  </style>
+</head>
+<body>
+  <div class="tarjeta">
+    <a href="index.html" class="logo">Eco<span>Ruta</span></a>
+    <p class="subtitulo" id="subtituloRecuperar">Crea tu nueva contraseña</p>
+
+    <!-- Formulario nueva contraseña -->
+    <div id="formularioNueva">
+      <div class="campo">
+        <label class="etiqueta"><i class="bi bi-lock-fill"></i> Nueva contraseña</label>
+        <div class="contenedor-pass">
+          <input type="password" id="nuevaContrasena" class="entrada" placeholder="Mínimo 6 caracteres"/>
+          <button class="ojo" id="botonOjo" type="button">
+            <i class="bi bi-eye-fill" id="iconoOjoRec"></i>
+          </button>
+        </div>
+      </div>
+      <div class="campo">
+        <label class="etiqueta"><i class="bi bi-lock-fill"></i> Confirmar contraseña</label>
+        <input type="password" id="confirmarContrasena" class="entrada" placeholder="Repite tu contraseña"/>
+      </div>
+      <div class="mensaje" id="mensajeRec"></div>
+      <button class="boton" id="botonGuardar">
+        <i class="bi bi-check-lg"></i> Guardar nueva contraseña
+      </button>
+    </div>
+
+    <a href="index.html" class="enlace-volver">
+      <i class="bi bi-arrow-left"></i> Volver al inicio
+    </a>
+  </div>
+
+  <script>
+    var URL_BACKEND = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'
+      : 'https://ecoruta-production.up.railway.app';
+
+    var params = new URLSearchParams(window.location.search);
+    var token  = params.get('token');
+
+    var mensajeEl = document.getElementById('mensajeRec');
+
+    function mostrarMensaje(texto, esExito) {
+      mensajeEl.textContent = texto;
+      mensajeEl.className   = 'mensaje ' + (esExito ? 'exito' : 'error');
+    }
+
+    if (!token) {
+      mostrarMensaje('Enlace inválido. Solicita uno nuevo desde la página principal.', false);
+      document.getElementById('botonGuardar').disabled = true;
+    }
+
+    document.getElementById('botonOjo').addEventListener('click', function() {
+      var campo = document.getElementById('nuevaContrasena');
+      var icono = document.getElementById('iconoOjoRec');
+      if (campo.type === 'password') {
+        campo.type    = 'text';
+        icono.className = 'bi bi-eye-slash-fill';
+      } else {
+        campo.type    = 'password';
+        icono.className = 'bi bi-eye-fill';
+      }
+    });
+
+    document.getElementById('botonGuardar').addEventListener('click', async function() {
+      var nueva    = document.getElementById('nuevaContrasena').value.trim();
+      var confirmar = document.getElementById('confirmarContrasena').value.trim();
+
+      if (!nueva || !confirmar) {
+        mostrarMensaje('Completa ambos campos.', false);
+        return;
+      }
+      if (nueva.length < 6) {
+        mostrarMensaje('La contraseña debe tener al menos 6 caracteres.', false);
+        return;
+      }
+      if (nueva !== confirmar) {
+        mostrarMensaje('Las contraseñas no coinciden.', false);
+        return;
+      }
+
+      this.disabled    = true;
+      this.textContent = 'Guardando...';
+
+      try {
+        var resp  = await fetch(URL_BACKEND + '/api/nueva-contrasena', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ token: token, nuevaContrasena: nueva })
+        });
+        var datos = await resp.json();
+
+        if (datos.ok) {
+          mostrarMensaje('✓ ' + datos.mensaje, true);
+          document.getElementById('subtituloRecuperar').textContent = '¡Contraseña actualizada!';
+          document.getElementById('formularioNueva').style.display  = 'none';
+        } else {
+          mostrarMensaje(datos.mensaje, false);
+          this.disabled   = false;
+          this.innerHTML  = '<i class="bi bi-check-lg"></i> Guardar nueva contraseña';
+        }
+      } catch (error) {
+        mostrarMensaje('No se pudo conectar con el servidor.', false);
+        this.disabled   = false;
+        this.innerHTML  = '<i class="bi bi-check-lg"></i> Guardar nueva contraseña';
+      }
+    });
+  </script>
+</body>
+</html>

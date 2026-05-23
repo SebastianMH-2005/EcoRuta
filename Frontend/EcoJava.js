@@ -165,6 +165,8 @@ function guardarSesion(token, nombre, rol) {
 function actualizarNavbar(nombre) {
   var botonNav          = document.getElementById('botonAbrirLogin');
   var botonCerrarSesNav = document.getElementById('botonCerrarSesion');
+  var botonDashboard    = document.getElementById('botonDashboard');
+  var rol               = localStorage.getItem('eco_rol');
 
   if (botonNav) {
     botonNav.innerHTML         = '<i class="bi bi-person-check-fill"></i> ' + nombre;
@@ -178,6 +180,11 @@ function actualizarNavbar(nombre) {
   /* Mostrar botón de cerrar sesión */
   if (botonCerrarSesNav) {
     botonCerrarSesNav.style.display = 'inline-flex';
+  }
+
+  /* Mostrar botón del dashboard solo para municipalidad y admin */
+  if (botonDashboard && (rol === 'municipalidad' || rol === 'admin')) {
+    botonDashboard.style.display = 'inline-flex';
   }
 
   /* Mostrar secciones que requieren login */
@@ -838,10 +845,12 @@ function cerrarSesion() {
   localStorage.removeItem('eco_nombre');
   localStorage.removeItem('eco_rol');
 
-  /* Restaurar botón de iniciar sesión */
-  var botonNav = document.getElementById('botonAbrirLogin');
+  var botonNav       = document.getElementById('botonAbrirLogin');
+  var botonCerrarSes = document.getElementById('botonCerrarSesion');
+  var botonDashboard = document.getElementById('botonDashboard');
+
   if (botonNav) {
-    botonNav.innerHTML  = '<i class="bi bi-person-fill"></i> Iniciar sesión';
+    botonNav.innerHTML         = '<i class="bi bi-person-fill"></i> Iniciar sesión';
     botonNav.style.background  = '';
     botonNav.style.borderColor = '';
     botonNav.style.cursor      = '';
@@ -849,24 +858,18 @@ function cerrarSesion() {
     botonNav.addEventListener('click', abrirModal);
   }
 
-  /* Ocultar botón de cerrar sesión */
-  if (botonCerrarSesion) {
-    botonCerrarSesion.style.display = 'none';
-  }
+  if (botonCerrarSes)  botonCerrarSes.style.display  = 'none';
+  if (botonDashboard)  botonDashboard.style.display   = 'none';
 
-  /* Ocultar contador de alertas si existe */
   var contador = document.getElementById('contadorAlertas');
   if (contador) contador.remove();
 
-  /* Ocultar secciones que requieren login */
   var seccionSolicitud = document.getElementById('solicitud');
   var seccionPanel     = document.getElementById('panel-usuario');
   if (seccionSolicitud) seccionSolicitud.style.display = 'none';
   if (seccionPanel)     seccionPanel.style.display     = 'none';
 
-  /* Limpiar historial */
   limpiarHistorial();
-
   console.log('Sesión cerrada correctamente.');
 }
 

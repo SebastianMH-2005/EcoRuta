@@ -440,56 +440,351 @@ app.put('/api/perfil/ubicacion', verificarToken, async function(req, res) {
 
 // ─── POST /api/solicitud-camion ──────────────────────────────
 // El vecino autenticado solicita que un camión pase por su zona.
-// Guarda la solicitud como una notificación especial para la municipalidad.
-// Recibe: direccion, referencia, tipo_residuo
+// Guarda la solicitud en la tabla solicitud_camion.
 app.post('/api/solicitud-camion', verificarToken, async function(req, res) {
-  var { direccion, referencia, tipo_residuo } = req.body;
+  var { direccion, referencia, tipo_residuo, frecuencia } = req.body;
 
   if (!direccion) {
     return res.status(400).json({ ok: false, mensaje: 'La dirección es obligatoria.' });
   }
 
   try {
-    // Obtener nombre del usuario que hace la solicitud
     var usuario = await pool.query(
-      'SELECT nombre, correo FROM usuario WHERE id_usuario = $1',
+      'SELECT nombre FROM usuario WHERE id_usuario = $1',
       [req.usuario.id]
     );
 
     var nombreUsuario = usuario.rows[0] ? usuario.rows[0].nombre : 'Vecino';
-    var tipoRes       = tipo_residuo || 'general';
-    var ref           = referencia   || 'Sin referencia adicional';
 
-    var mensaje =
-      '🚛 SOLICITUD DE CAMIÓN — ' + nombreUsuario + ' solicita recolección en: ' +
-      direccion + '. Referencia: ' + ref + '. Tipo de residuo: ' + tipoRes + '.';
+    await pool.query(
+      `INSERT INTO solicitud_camion
+        (id_usuario, direccion, distrito, tipo_residuo, frecuencia, descripcion)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        req.usuario.id,
+        direccion,
+        req.body.distrito    || null,
+        tipo_residuo          || 'general',
+        frecuencia            || 'diario',
+        referencia            || null
+      ]
+    );
 
-    // Guardar la solicitud en la tabla notificacion
-    // (id_camion NULL porque aún no hay camión asignado)
-await pool.query(
-  `INSERT INTO solicitud_camion
-    (id_usuario, direccion, distrito, tipo_residuo, frecuencia, descripcion)
-   VALUES ($1, $2, $3, $4, $5, $6)`,
-  [
-    req.usuario.id,
-    direccion,
-    req.body.distrito    || null,
-    tipo_residuo         || 'general',
-    req.body.frecuencia  || 'diario',
-    referencia           || null
-  ]
-);
-
-    console.log('  📍 Solicitud de camión recibida de: ' + nombreUsuario + ' → ' + direccion);
+    console.log('  📍 Solicitud de camión de: ' + nombreUsuario + ' → ' + direccion);
 
     res.json({
       ok: true,
-      mensaje: '¡Solicitud enviada! La municipalidad revisará tu pedido pronto.'
+      mensaje: '¡Solicitud enviada! La municipalidad revisará tu pedido en 24 horas.'
     });
 
   } catch (error) {
     console.error('Error al guardar solicitud:', error.message);
     res.status(500).json({ ok: false, mensaje: 'Error al enviar la solicitud.' });
+  }
+});
+
+
+// ═══════════════════════════════════════════════════════
+//  RUTAS DE GESTIÓN MUNICIPAL
+//  Solo accesibles para usuarios con rol municipalidad o admin
+// ═══════════════════════════════════════════════════════
+
+// Middleware: verificar que el usuario es municipalidad o admin
+function verificarMunicipalidad(req, res, next) {
+  if (req.usuario.rol !== 'municipalidad' && req.usuario.rol !== 'admin') {
+    return res.status(403).json({
+      ok: false,
+      mensaje: 'Acceso denegado. Solo para usuarios municipales.'
+    });
+  }
+  next();
+}
+
+// ─── GET /api/municipal/solicitudes ──────────────────────────
+// Devuelve todas las solicitudes de camión ordenadas por fecha.
+// La municipalidad ve aquí qué zonas necesitan cobertura.
+app.get('/api/municipal/solicitudes',
+  verificarToken,
+  verificarMunicipalidad,
+  async function(req, res) {
+    try {
+      var estado = req.query.estado || null;
+
+      var consulta = `
+        SELECT
+          s.id_solicitud,
+          s.direccion,
+          s.distrito,
+          s.tipo_residuo,
+          s.frecuencia,
+          s.descripcion,
+          s.estado,
+          s.fecha_solicitud,
+          u.nombre    AS nombre_vecino,
+          u.correo    AS correo_vecino
+        FROM solicitud_camion s
+        JOIN usuario u ON u.id_usuario = s.id_usuario
+        ${estado ? 'WHERE s.estado = $1' : ''}
+        ORDER BY s.fecha_solicitud DESC
+      `;
+
+      var resultado = estado
+        ? await pool.query(consulta, [estado])
+        : await pool.query(consulta);
+
+      res.json({ ok: true, solicitudes: resultado.rows });
+
+    } catch (error) {
+      console.error('Error al obtener solicitudes:', error.message);
+      res.status(500).json({ ok: false, mensaje: 'Error al obtener solicitudes.' });
+    }
+  }
+);
+
+// ─── PUT /api/municipal/solicitudes/:id ──────────────────────
+// La municipalidad aprueba o rechaza una solicitud.
+// Al aprobar se notifica automáticamente al vecino.
+app.put('/api/municipal/solicitudes/:id',
+  verificarToken,
+  verificarMunicipalidad,
+  async function(req, res) {
+    var idSolicitud = req.params.id;
+    var { estado, comentario } = req.body;
+
+    if (!['aprobada', 'rechazada', 'en_proceso'].includes(estado)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Estado no válido. Usa: aprobada, rechazada o en_proceso.'
+      });
+    }
+
+    try {
+      // Actualizar el estado de la solicitud
+      var solicitud = await pool.query(
+        `UPDATE solicitud_camion
+         SET estado = $1
+         WHERE id_solicitud = $2
+         RETURNING id_usuario, direccion`,
+        [estado, idSolicitud]
+      );
+
+      if (solicitud.rows.length === 0) {
+        return res.status(404).json({ ok: false, mensaje: 'Solicitud no encontrada.' });
+      }
+
+      var idVecino   = solicitud.rows[0].id_usuario;
+      var direccion  = solicitud.rows[0].direccion;
+
+      // Construir mensaje de notificación para el vecino
+      var estadoTexto = {
+        aprobada:   '✅ aprobada',
+        rechazada:  '❌ rechazada',
+        en_proceso: '🔄 en proceso'
+      };
+
+      var mensajeNotif =
+        'Tu solicitud de recolección en ' + direccion +
+        ' fue ' + estadoTexto[estado] + ' por la municipalidad.' +
+        (comentario ? ' Comentario: ' + comentario : '');
+
+      // Notificar al vecino
+      await pool.query(
+        `INSERT INTO notificacion (id_usuario, id_camion, mensaje)
+         VALUES ($1, NULL, $2)`,
+        [idVecino, mensajeNotif]
+      );
+
+      console.log('  ✓ Solicitud ' + idSolicitud + ' marcada como: ' + estado);
+
+      res.json({
+        ok: true,
+        mensaje: 'Solicitud actualizada. El vecino fue notificado.'
+      });
+
+    } catch (error) {
+      console.error('Error al actualizar solicitud:', error.message);
+      res.status(500).json({ ok: false, mensaje: 'Error al actualizar la solicitud.' });
+    }
+  }
+);
+
+// ─── GET /api/municipal/estadisticas ─────────────────────────
+// Resumen de estadísticas para el dashboard municipal.
+app.get('/api/municipal/estadisticas',
+  verificarToken,
+  verificarMunicipalidad,
+  async function(req, res) {
+    try {
+      var stats = await pool.query(`
+        SELECT
+          (SELECT COUNT(*) FROM usuario WHERE rol = 'vecino')          AS total_vecinos,
+          (SELECT COUNT(*) FROM camion WHERE estado_mantenimiento = 'operativo') AS camiones_activos,
+          (SELECT COUNT(*) FROM solicitud_camion WHERE estado = 'pendiente')     AS solicitudes_pendientes,
+          (SELECT COUNT(*) FROM solicitud_camion WHERE estado = 'aprobada')      AS solicitudes_aprobadas,
+          (SELECT COUNT(*) FROM notificacion WHERE fecha_hora > NOW() - INTERVAL '24 hours') AS alertas_hoy,
+          (SELECT COUNT(*) FROM ecoruta WHERE estado = 'activa')       AS rutas_activas
+      `);
+
+      res.json({ ok: true, estadisticas: stats.rows[0] });
+
+    } catch (error) {
+      console.error('Error al obtener estadísticas:', error.message);
+      res.status(500).json({ ok: false, mensaje: 'Error al obtener estadísticas.' });
+    }
+  }
+);
+
+
+// ═══════════════════════════════════════════════════════
+//  CALIFICACIÓN DEL SERVICIO
+// ═══════════════════════════════════════════════════════
+
+// ─── POST /api/calificacion ──────────────────────────────────
+// Guarda la calificación del vecino sobre el servicio del día.
+app.post('/api/calificacion', verificarToken, async function(req, res) {
+  var { puntuacion, comentario } = req.body;
+
+  if (!puntuacion || puntuacion < 1 || puntuacion > 5) {
+    return res.status(400).json({ ok: false, mensaje: 'La puntuación debe ser entre 1 y 5.' });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO calificacion (id_usuario, puntuacion, comentario)
+       VALUES ($1, $2, $3)`,
+      [req.usuario.id, puntuacion, comentario || null]
+    );
+
+    console.log('  ⭐ Calificación guardada — Usuario: ' + req.usuario.id + ' · Puntuación: ' + puntuacion);
+
+    res.json({ ok: true, mensaje: '¡Gracias por tu calificación!' });
+
+  } catch (error) {
+    console.error('Error al guardar calificación:', error.message);
+    res.status(500).json({ ok: false, mensaje: 'Error al guardar la calificación.' });
+  }
+});
+
+// ─── GET /api/calificacion/promedio ──────────────────────────
+// Devuelve el promedio general de calificaciones del servicio.
+app.get('/api/calificacion/promedio', async function(req, res) {
+  try {
+    var resultado = await pool.query(`
+      SELECT
+        ROUND(AVG(puntuacion), 1) AS promedio,
+        COUNT(*)                  AS total
+      FROM calificacion
+    `);
+    res.json({ ok: true, datos: resultado.rows[0] });
+  } catch (error) {
+    res.status(500).json({ ok: false, mensaje: 'Error al obtener promedio.' });
+  }
+});
+
+
+// ═══════════════════════════════════════════════════════
+//  RECUPERACIÓN DE CONTRASEÑA
+// ═══════════════════════════════════════════════════════
+
+// ─── POST /api/recuperar-contrasena ──────────────────────────
+// Envía un correo con un enlace para restablecer la contraseña.
+// Por ahora genera un token temporal y lo envía por correo.
+app.post('/api/recuperar-contrasena', async function(req, res) {
+  var { correo } = req.body;
+
+  if (!correo) {
+    return res.status(400).json({ ok: false, mensaje: 'El correo es obligatorio.' });
+  }
+
+  try {
+    var resultado = await pool.query(
+      'SELECT id_usuario, nombre FROM usuario WHERE correo = $1',
+      [correo]
+    );
+
+    // Por seguridad, siempre responder lo mismo aunque no exista el correo
+    if (resultado.rows.length === 0) {
+      return res.json({ ok: true, mensaje: 'Si ese correo existe, recibirás instrucciones.' });
+    }
+
+    var usuario = resultado.rows[0];
+
+    // Generar token temporal válido por 1 hora
+    var tokenRecuperacion = jwt.sign(
+      { id: usuario.id_usuario, tipo: 'recuperacion' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    var enlaceRecuperacion = 'https://eco-ruta-hhd4.vercel.app/recuperar.html?token=' + tokenRecuperacion;
+
+    // Enviar correo con el enlace
+    await resend.emails.send({
+      from:    'EcoRuta Conectada <onboarding@resend.dev>',
+      to:      correo,
+      subject: 'Recuperación de contraseña — EcoRuta Conectada',
+      html:
+        '<div style="font-family:sans-serif;max-width:520px;margin:0 auto;background:#0d1f1a;color:#e8f5f0;border-radius:16px;overflow:hidden;">' +
+          '<div style="background:#1D9E75;padding:2rem;text-align:center;">' +
+            '<h1 style="margin:0;font-size:1.6rem;font-weight:800;color:#fff;">EcoRuta Conectada</h1>' +
+          '</div>' +
+          '<div style="padding:2rem;">' +
+            '<h2 style="color:#1D9E75;">Recuperación de contraseña</h2>' +
+            '<p style="color:#7ab89e;line-height:1.7;">Hola <strong style="color:#e8f5f0;">' + usuario.nombre + '</strong>, recibimos una solicitud para restablecer tu contraseña.</p>' +
+            '<p style="color:#7ab89e;">Haz clic en el botón para crear una nueva contraseña. El enlace expira en <strong style="color:#EF9F27;">1 hora</strong>.</p>' +
+            '<div style="text-align:center;margin:2rem 0;">' +
+              '<a href="' + enlaceRecuperacion + '" style="background:#1D9E75;color:#fff;padding:0.85rem 2rem;border-radius:10px;text-decoration:none;font-weight:700;">Restablecer contraseña</a>' +
+            '</div>' +
+            '<p style="color:#7ab89e;font-size:0.8rem;border-top:1px solid rgba(29,158,117,0.2);padding-top:1rem;">Si no solicitaste esto, ignora este correo. Tu contraseña no cambiará.</p>' +
+          '</div>' +
+        '</div>'
+    });
+
+    console.log('  📧 Correo de recuperación enviado a: ' + correo);
+    res.json({ ok: true, mensaje: 'Si ese correo existe, recibirás instrucciones.' });
+
+  } catch (error) {
+    console.error('Error en recuperación:', error.message);
+    res.status(500).json({ ok: false, mensaje: 'Error al procesar la solicitud.' });
+  }
+});
+
+// ─── POST /api/nueva-contrasena ──────────────────────────────
+// Restablece la contraseña usando el token de recuperación.
+app.post('/api/nueva-contrasena', async function(req, res) {
+  var { token, nuevaContrasena } = req.body;
+
+  if (!token || !nuevaContrasena) {
+    return res.status(400).json({ ok: false, mensaje: 'Token y nueva contraseña son obligatorios.' });
+  }
+
+  if (nuevaContrasena.length < 6) {
+    return res.status(400).json({ ok: false, mensaje: 'La contraseña debe tener al menos 6 caracteres.' });
+  }
+
+  try {
+    var datos = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (datos.tipo !== 'recuperacion') {
+      return res.status(400).json({ ok: false, mensaje: 'Token inválido.' });
+    }
+
+    var hash = await bcrypt.hash(nuevaContrasena, 10);
+
+    await pool.query(
+      'UPDATE usuario SET contrasena_hash = $1 WHERE id_usuario = $2',
+      [hash, datos.id]
+    );
+
+    console.log('  ✓ Contraseña restablecida — Usuario ID: ' + datos.id);
+    res.json({ ok: true, mensaje: '¡Contraseña actualizada correctamente! Ya puedes iniciar sesión.' });
+
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ ok: false, mensaje: 'El enlace expiró. Solicita uno nuevo.' });
+    }
+    console.error('Error al restablecer contraseña:', error.message);
+    res.status(500).json({ ok: false, mensaje: 'Error al restablecer la contraseña.' });
   }
 });
 

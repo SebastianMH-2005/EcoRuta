@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Página no encontrada — EcoRuta Conectada</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --verde:   #1D9E75;
+      --acento:  #EF9F27;
+      --fondo:   #0d1f1a;
+      --texto:   #e8f5f0;
+      --atenuado:#7ab89e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      background-image:
+        linear-gradient(rgba(29,158,117,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29,158,117,0.05) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    .contenedor-404 { max-width: 520px; }
+    .numero-404 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(6rem, 20vw, 10rem);
+      font-weight: 800;
+      color: var(--verde);
+      line-height: 1;
+      opacity: 0.15;
+      letter-spacing: -0.05em;
+    }
+    .icono-404 {
+      font-size: 4rem;
+      margin: -2rem 0 1.5rem;
+      display: block;
+    }
+    .titulo-404 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--texto);
+      margin-bottom: 0.8rem;
+      letter-spacing: -0.03em;
+    }
+    .desc-404 {
+      font-size: 1rem;
+      color: var(--atenuado);
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+    .botones-404 {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-inicio {
+      background: var(--verde);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      padding: 0.75rem 2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-inicio:hover {
+      background: #0F6E56;
+      transform: translateY(-2px);
+      color: #fff;
+    }
+    .btn-volver {
+      background: transparent;
+      color: var(--atenuado);
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      border: 1px solid rgba(29,158,117,0.25);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-volver:hover {
+      border-color: rgba(29,158,117,0.5);
+      color: var(--texto);
+    }
+    .marca-404 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--verde);
+      margin-bottom: 3rem;
+      display: block;
+    }
+    .marca-404 span { color: var(--acento); }
+  </style>
+</head>
+<body>
+  <div class="contenedor-404">
+    <a href="index.html" class="marca-404">Eco<span>Ruta</span> Conectada</a>
+    <div class="numero-404">404</div>
+    <span class="icono-404">🚛</span>
+    <h1 class="titulo-404">¡Ups! Esta página no existe</h1>
+    <p class="desc-404">
+      El camión recolector no pudo encontrar esta ruta.<br>
+      Puede que la página haya sido movida o que la URL esté incorrecta.
+    </p>
+    <div class="botones-404">
+      <a href="index.html" class="btn-inicio">
+        <i class="bi bi-house-fill"></i> Volver al inicio
+      </a>
+      <a href="javascript:history.back()" class="btn-volver">
+        <i class="bi bi-arrow-left"></i> Página anterior
+      </a>
+    </div>
+  </div>
+</body>
+</html>
