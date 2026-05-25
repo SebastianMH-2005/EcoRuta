@@ -245,7 +245,7 @@ app.get('/api/camiones', async function(req, res) {
         ORDER BY timestamp DESC
         LIMIT 1
       ) g ON true
-      WHERE c.estado_mantenimiento = 'operativo'
+      WHERE c.estado_mantenimiento IN ('operativo', 'mantenimiento')
       ORDER BY c.id_camion
     `);
 

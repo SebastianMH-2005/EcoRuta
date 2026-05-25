@@ -70,6 +70,8 @@ function cerrarModal() {
   campoCorreoReg.value     = '';
   campoContrasenaReg.value = '';
   campoConfirmarReg.value  = '';
+  /* Agregar esta línea: */
+  if (vistaRecuperar) vistaRecuperar.style.display = 'none';
   mostrarVistaLogin();
 }
 
@@ -85,6 +87,8 @@ function mostrarVistaRegistro() {
 function mostrarVistaLogin() {
   vistaRegistro.style.display = 'none';
   vistaLogin.style.display    = 'flex';
+  /* Agregar esta línea: */
+  if (vistaRecuperar) vistaRecuperar.style.display = 'none';
   subtituloModal.textContent  = 'Ingresa a tu cuenta para continuar';
   mensajeErrorReg.classList.remove('visible');
 }

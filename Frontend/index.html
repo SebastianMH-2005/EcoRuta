@@ -1,1036 +1,1088 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EcoRuta Conectada</title>
 
-  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
-  <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+  <meta name="description"
+    content="EcoRuta Conectada permite rastrear en tiempo real los camiones recolectores de tu distrito mediante GPS. Recibe alertas antes de que llegue el camión a tu calle." />
+  <meta name="keywords"
+    content="ecoruta, recolección de basura, GPS camiones, residuos Lima, limpieza urbana, municipalidad" />
+  <meta name="author" content="EcoRuta Conectada" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="EcoRuta Conectada" />
+  <meta property="og:description" content="Rastrea en tiempo real los camiones recolectores de tu distrito." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://eco-ruta-hhd4.vercel.app" />
+
+  <meta name="google-site-verification" content="du3SdC7hth7tJloSiPFcYzMYN8-en2mHutRqEX7wzd4" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+    rel="stylesheet" />
   <!-- Estilos del proyecto -->
-  <link rel="stylesheet" href="EcoStilos.css"/>
+  <link rel="stylesheet" href="EcoStilos.css" />
 </head>
+
 <body>
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      MODAL DE INICIO DE SESIÓN Y REGISTRO
      ═══════════════════════════════════════ -->
-<div class="fondo-modal" id="fondoModal">
-  <div class="tarjeta-login" id="tarjetaLogin">
+  <div class="fondo-modal" id="fondoModal">
+    <div class="tarjeta-login" id="tarjetaLogin">
 
-    <div class="login-cabecera">
-      <div class="login-logo">Eco<span>Ruta</span></div>
-      <p class="login-subtitulo" id="subtituloModal">Ingresa a tu cuenta para continuar</p>
-      <button class="login-cerrar" id="botonCerrarLogin" title="Cerrar">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </div>
-
-    <!-- Vista: Inicio de sesión -->
-    <div class="login-cuerpo" id="vistaLogin">
-      <div class="campo-formulario">
-        <label class="etiqueta-campo" for="campoCorreo">
-          <i class="bi bi-envelope-fill"></i> Correo electrónico
-        </label>
-        <input type="email" id="campoCorreo" class="entrada-campo"
-          placeholder="tucorreo@ejemplo.com" autocomplete="email"/>
+      <div class="login-cabecera">
+        <div class="login-logo">Eco<span>Ruta</span></div>
+        <p class="login-subtitulo" id="subtituloModal">Ingresa a tu cuenta para continuar</p>
+        <button class="login-cerrar" id="botonCerrarLogin" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
-      <div class="campo-formulario">
-        <label class="etiqueta-campo" for="campoContrasena">
-          <i class="bi bi-lock-fill"></i> Contraseña
-        </label>
-        <div class="contenedor-contrasena">
-          <input type="password" id="campoContrasena" class="entrada-campo"
-            placeholder="Tu contraseña" autocomplete="current-password"/>
-          <button class="boton-ojo" id="botonMostrarClave" type="button">
-            <i class="bi bi-eye-fill" id="iconoOjo"></i>
-          </button>
+
+      <!-- Vista: Inicio de sesión -->
+      <div class="login-cuerpo" id="vistaLogin">
+        <div class="campo-formulario">
+          <label class="etiqueta-campo" for="campoCorreo">
+            <i class="bi bi-envelope-fill"></i> Correo electrónico
+          </label>
+          <input type="email" id="campoCorreo" class="entrada-campo" placeholder="tucorreo@ejemplo.com"
+            autocomplete="email" />
         </div>
-      </div>
-      <div class="mensaje-error" id="mensajeError">
-        <i class="bi bi-exclamation-circle-fill"></i>
-        <span id="textoError">Correo o contraseña incorrectos.</span>
-      </div>
-      <div class="fila-recordar">
-        <label class="etiqueta-recordar">
-          <input type="checkbox" id="recordarSesion" class="check-recordar"/>
-          Recordar sesión
-        </label>
-        <a href="#" class="enlace-olvide" id="botonIrRecuperar">¿Olvidaste tu contraseña?</a>
-      </div>
-      <button class="boton-ingresar" id="botonIngresar">
-        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
-      </button>
-      <p class="texto-registro">
-        ¿No tienes cuenta?
-        <a href="#" class="enlace-registro" id="botonIrRegistro">Crear cuenta gratis</a>
-      </p>
-    </div>
-
-    <!-- Vista: Recuperar contraseña -->
-    <div class="login-cuerpo" id="vistaRecuperar" style="display:none;">
-      <div class="campo-formulario">
-        <label class="etiqueta-campo" for="campoCorreoRecuperar">
-          <i class="bi bi-envelope-fill"></i> Correo electrónico
-        </label>
-        <input type="email" id="campoCorreoRecuperar" class="entrada-campo"
-          placeholder="tucorreo@ejemplo.com"/>
-      </div>
-      <div class="mensaje-error" id="mensajeRecuperar">
-        <i class="bi bi-info-circle-fill"></i>
-        <span id="textoRecuperar"></span>
-      </div>
-      <button class="boton-ingresar" id="botonEnviarRecuperar">
-        <i class="bi bi-send-fill"></i> Enviar instrucciones
-      </button>
-      <p class="texto-registro" style="margin-top:1rem;">
-        <a href="#" class="enlace-registro" id="botonVolverLogin">
-          <i class="bi bi-arrow-left"></i> Volver al inicio de sesión
-        </a>
-      </p>
-    </div>
-
-    <!-- Vista: Registro -->
-    <div class="login-cuerpo" id="vistaRegistro" style="display:none;">
-      <div class="campo-formulario">
-        <label class="etiqueta-campo" for="campoNombreReg">
-          <i class="bi bi-person-fill"></i> Nombre completo
-        </label>
-        <input type="text" id="campoNombreReg" class="entrada-campo"
-          placeholder="Tu nombre completo" autocomplete="name"/>
-      </div>
-      <div class="campo-formulario">
-        <label class="etiqueta-campo" for="campoCorreoReg">
-          <i class="bi bi-envelope-fill"></i> Correo electrónico
-        </label>
-        <input type="email" id="campoCorreoReg" class="entrada-campo"
-          placeholder="tucorreo@ejemplo.com" autocomplete="email"/>
-      </div>
-      <div class="campo-formulario">
-        <label class="etiqueta-campo" for="campoContrasenaReg">
-          <i class="bi bi-lock-fill"></i> Contraseña
-        </label>
-        <div class="contenedor-contrasena">
-          <input type="password" id="campoContrasenaReg" class="entrada-campo"
-            placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
-          <button class="boton-ojo" id="botonOjoReg" type="button">
-            <i class="bi bi-eye-fill" id="iconoOjoReg"></i>
-          </button>
+        <div class="campo-formulario">
+          <label class="etiqueta-campo" for="campoContrasena">
+            <i class="bi bi-lock-fill"></i> Contraseña
+          </label>
+          <div class="contenedor-contrasena">
+            <input type="password" id="campoContrasena" class="entrada-campo" placeholder="Tu contraseña"
+              autocomplete="current-password" />
+            <button class="boton-ojo" id="botonMostrarClave" type="button">
+              <i class="bi bi-eye-fill" id="iconoOjo"></i>
+            </button>
+          </div>
         </div>
+        <div class="mensaje-error" id="mensajeError">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          <span id="textoError">Correo o contraseña incorrectos.</span>
+        </div>
+        <div class="fila-recordar">
+          <label class="etiqueta-recordar">
+            <input type="checkbox" id="recordarSesion" class="check-recordar" />
+            Recordar sesión
+          </label>
+          <a href="#" class="enlace-olvide" id="botonIrRecuperar">¿Olvidaste tu contraseña?</a>
+        </div>
+        <button class="boton-ingresar" id="botonIngresar">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+        </button>
+        <p class="texto-registro">
+          ¿No tienes cuenta?
+          <a href="#" class="enlace-registro" id="botonIrRegistro">Crear cuenta gratis</a>
+        </p>
       </div>
-      <div class="campo-formulario">
-        <label class="etiqueta-campo" for="campoConfirmarReg">
-          <i class="bi bi-lock-fill"></i> Confirmar contraseña
-        </label>
-        <input type="password" id="campoConfirmarReg" class="entrada-campo"
-          placeholder="Repite tu contraseña" autocomplete="new-password"/>
-      </div>
-      <div class="mensaje-error" id="mensajeErrorReg">
-        <i class="bi bi-exclamation-circle-fill"></i>
-        <span id="textoErrorReg">Error al registrarse.</span>
-      </div>
-      <button class="boton-ingresar" id="botonRegistrarse">
-        <i class="bi bi-person-plus-fill"></i> Crear cuenta
-      </button>
-      <p class="texto-registro" style="margin-top:1rem;">
-        ¿Ya tienes cuenta?
-        <a href="#" class="enlace-registro" id="botonIrLogin">Iniciar sesión</a>
-      </p>
-    </div>
 
+      <!-- Vista: Recuperar contraseña -->
+      <div class="login-cuerpo" id="vistaRecuperar" style="display:none;">
+        <div class="campo-formulario">
+          <label class="etiqueta-campo" for="campoCorreoRecuperar">
+            <i class="bi bi-envelope-fill"></i> Correo electrónico
+          </label>
+          <input type="email" id="campoCorreoRecuperar" class="entrada-campo" placeholder="tucorreo@ejemplo.com" />
+        </div>
+        <div class="mensaje-error" id="mensajeRecuperar">
+          <i class="bi bi-info-circle-fill"></i>
+          <span id="textoRecuperar"></span>
+        </div>
+        <button class="boton-ingresar" id="botonEnviarRecuperar">
+          <i class="bi bi-send-fill"></i> Enviar instrucciones
+        </button>
+        <p class="texto-registro" style="margin-top:1rem;">
+          <a href="#" class="enlace-registro" id="botonVolverLogin">
+            <i class="bi bi-arrow-left"></i> Volver al inicio de sesión
+          </a>
+        </p>
+      </div>
+
+      <!-- Vista: Registro -->
+      <div class="login-cuerpo" id="vistaRegistro" style="display:none;">
+        <div class="campo-formulario">
+          <label class="etiqueta-campo" for="campoNombreReg">
+            <i class="bi bi-person-fill"></i> Nombre completo
+          </label>
+          <input type="text" id="campoNombreReg" class="entrada-campo" placeholder="Tu nombre completo"
+            autocomplete="name" />
+        </div>
+        <div class="campo-formulario">
+          <label class="etiqueta-campo" for="campoCorreoReg">
+            <i class="bi bi-envelope-fill"></i> Correo electrónico
+          </label>
+          <input type="email" id="campoCorreoReg" class="entrada-campo" placeholder="tucorreo@ejemplo.com"
+            autocomplete="email" />
+        </div>
+        <div class="campo-formulario">
+          <label class="etiqueta-campo" for="campoContrasenaReg">
+            <i class="bi bi-lock-fill"></i> Contraseña
+          </label>
+          <div class="contenedor-contrasena">
+            <input type="password" id="campoContrasenaReg" class="entrada-campo" placeholder="Mínimo 6 caracteres"
+              autocomplete="new-password" />
+            <button class="boton-ojo" id="botonOjoReg" type="button">
+              <i class="bi bi-eye-fill" id="iconoOjoReg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="campo-formulario">
+          <label class="etiqueta-campo" for="campoConfirmarReg">
+            <i class="bi bi-lock-fill"></i> Confirmar contraseña
+          </label>
+          <input type="password" id="campoConfirmarReg" class="entrada-campo" placeholder="Repite tu contraseña"
+            autocomplete="new-password" />
+        </div>
+        <div class="mensaje-error" id="mensajeErrorReg">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          <span id="textoErrorReg">Error al registrarse.</span>
+        </div>
+        <button class="boton-ingresar" id="botonRegistrarse">
+          <i class="bi bi-person-plus-fill"></i> Crear cuenta
+        </button>
+        <p class="texto-registro" style="margin-top:1rem;">
+          ¿Ya tienes cuenta?
+          <a href="#" class="enlace-registro" id="botonIrLogin">Iniciar sesión</a>
+        </p>
+      </div>
+
+    </div>
   </div>
-</div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      BARRA DE NAVEGACIÓN
      ═══════════════════════════════════════ -->
-<nav class="barra-navegacion">
-  <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
-    <a href="#" class="marca-logo">Eco<span>Ruta</span> Conectada</a>
-    <div class="d-flex align-items-center gap-1 flex-wrap">
-      <a href="#problema"      class="enlace-nav">Problemática</a>
-      <a href="#mapa"          class="enlace-nav">Mapa en vivo</a>
-      <a href="#como-funciona" class="enlace-nav">Cómo funciona</a>
-      <a href="#impacto"       class="enlace-nav">Impacto</a>
-      <a href="#faq"           class="enlace-nav">FAQ</a>
-      <a href="#mapa" class="boton-primario" style="padding:0.45rem 1.2rem; font-size:0.85rem;">
-        <i class="bi bi-geo-alt-fill"></i> Ver ruta
-      </a>
-      <button class="boton-sesion-nav" id="botonAbrirLogin">
-        <i class="bi bi-person-fill"></i> Iniciar sesión
-      </button>
-      <a href="dashboard.html" class="boton-sesion-nav" id="botonDashboard"
-        style="display:none; background:rgba(239,159,39,0.12);
+  <nav class="barra-navegacion">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <a href="#" class="marca-logo">Eco<span>Ruta</span> Conectada</a>
+      <div class="d-flex align-items-center gap-1 flex-wrap">
+        <a href="#problema" class="enlace-nav">Problemática</a>
+        <a href="#mapa" class="enlace-nav">Mapa en vivo</a>
+        <a href="#como-funciona" class="enlace-nav">Cómo funciona</a>
+        <a href="#impacto" class="enlace-nav">Impacto</a>
+        <a href="#faq" class="enlace-nav">FAQ</a>
+        <a href="#mapa" class="boton-primario" style="padding:0.45rem 1.2rem; font-size:0.85rem;">
+          <i class="bi bi-geo-alt-fill"></i> Ver ruta
+        </a>
+        <button class="boton-sesion-nav" id="botonAbrirLogin">
+          <i class="bi bi-person-fill"></i> Iniciar sesión
+        </button>
+        <a href="dashboard.html" class="boton-sesion-nav" id="botonDashboard" style="display:none; background:rgba(239,159,39,0.12);
                border-color:rgba(239,159,39,0.3); color:var(--color-acento);
                text-decoration:none;">
-        <i class="bi bi-speedometer2"></i> Panel municipal
-      </a>
-      <button class="boton-sesion-nav" id="botonCerrarSesion"
-        style="display:none; background:rgba(226,75,74,0.12);
+          <i class="bi bi-speedometer2"></i> Panel municipal
+        </a>
+        <button class="boton-sesion-nav" id="botonCerrarSesion" style="display:none; background:rgba(226,75,74,0.12);
                border-color:rgba(226,75,74,0.3); color:#e24b4a;">
-        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-      </button>
+          <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </button>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN HERO
      ═══════════════════════════════════════ -->
-<section class="seccion-inicio" id="inicio">
-  <div class="fondo-inicio"></div>
-  <div class="cuadricula-fondo"></div>
-  <div class="container position-relative">
-    <div class="row align-items-center g-5 gy-5">
+  <section class="seccion-inicio" id="inicio">
+    <div class="fondo-inicio"></div>
+    <div class="cuadricula-fondo"></div>
+    <div class="container position-relative">
+      <div class="row align-items-center g-5 gy-5">
 
-      <div class="col-lg-5">
-        <div class="etiqueta-hero">
-          <div class="punto-pulsante"></div> Proyecto Ambiental — 2026
-        </div>
-        <h1 class="titulo-principal">
-          Residuos<br>
-          <span class="texto-resaltado">inteligentes.</span><br>
-          Ciudades limpias.
-        </h1>
-        <p class="subtitulo-principal">
-          EcoRuta Conectada transforma la recolección de basura en un servicio
-          transparente, predecible y conectado con los ciudadanos mediante GPS en tiempo real.
-        </p>
-        <div class="d-flex gap-3 flex-wrap mt-4">
-          <a href="#mapa"     class="boton-primario"><i class="bi bi-map-fill"></i> Ver mapa interactivo</a>
-          <a href="#problema" class="boton-contorno"><i class="bi bi-arrow-down-circle"></i> Conocer más</a>
-        </div>
-        <div class="estadisticas-hero">
-          <div class="item-estadistica">
-            <div class="numero-estadistica">85<span style="font-size:1.2rem; color:var(--color-acento)">%</span></div>
-            <div class="etiqueta-estadistica">Reducción de residuos en vía pública</div>
+        <div class="col-lg-5">
+          <div class="etiqueta-hero">
+            <div class="punto-pulsante"></div> Proyecto Ambiental — 2026
           </div>
-          <div class="item-estadistica">
-            <div class="numero-estadistica">3<span style="font-size:1.2rem; color:var(--color-acento)">min</span></div>
-            <div class="etiqueta-estadistica">Tiempo de alerta antes de llegada</div>
+          <h1 class="titulo-principal">
+            Residuos<br>
+            <span class="texto-resaltado">inteligentes.</span><br>
+            Ciudades limpias.
+          </h1>
+          <p class="subtitulo-principal">
+            EcoRuta Conectada transforma la recolección de basura en un servicio
+            transparente, predecible y conectado con los ciudadanos mediante GPS en tiempo real.
+          </p>
+          <div class="d-flex gap-3 flex-wrap mt-4">
+            <a href="#mapa" class="boton-primario"><i class="bi bi-map-fill"></i> Ver mapa interactivo</a>
+            <a href="#problema" class="boton-contorno"><i class="bi bi-arrow-down-circle"></i> Conocer más</a>
           </div>
-          <div class="item-estadistica">
-            <div class="numero-estadistica">24<span style="font-size:1.2rem; color:var(--color-acento)">/7</span></div>
-            <div class="etiqueta-estadistica">Monitoreo en tiempo real</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-7">
-        <div class="tarjeta-visual aparece-arriba aparece-arriba-2">
-          <div class="barra-estado">
-            <div class="d-flex align-items-center gap-2">
-              <div class="punto-estado"></div>
-              <span style="font-size:0.8rem; color:var(--color-verde); font-weight:600;">Sistema activo</span>
+          <div class="estadisticas-hero">
+            <div class="item-estadistica">
+              <div class="numero-estadistica">85<span style="font-size:1.2rem; color:var(--color-acento)">%</span></div>
+              <div class="etiqueta-estadistica">Reducción de residuos en vía pública</div>
             </div>
-            <span style="font-size:0.75rem; color:var(--color-atenuado);">Lima Metropolitana</span>
+            <div class="item-estadistica">
+              <div class="numero-estadistica">3<span style="font-size:1.2rem; color:var(--color-acento)">min</span>
+              </div>
+              <div class="etiqueta-estadistica">Tiempo de alerta antes de llegada</div>
+            </div>
+            <div class="item-estadistica">
+              <div class="numero-estadistica">24<span style="font-size:1.2rem; color:var(--color-acento)">/7</span>
+              </div>
+              <div class="etiqueta-estadistica">Monitoreo en tiempo real</div>
+            </div>
           </div>
-          <div class="mini-mapa-previo">
-            <div class="linea-ruta-mini"></div>
-            <div class="camion-mini">🚛</div>
-            <div class="ping-mini"></div>
-            <div style="position:absolute; top:12px; right:12px; font-size:0.7rem;
+        </div>
+
+        <div class="col-lg-7">
+          <div class="tarjeta-visual aparece-arriba aparece-arriba-2">
+            <div class="barra-estado">
+              <div class="d-flex align-items-center gap-2">
+                <div class="punto-estado"></div>
+                <span style="font-size:0.8rem; color:var(--color-verde); font-weight:600;">Sistema activo</span>
+              </div>
+              <span style="font-size:0.75rem; color:var(--color-atenuado);">Lima Metropolitana</span>
+            </div>
+            <div class="mini-mapa-previo">
+              <div class="linea-ruta-mini"></div>
+              <div class="camion-mini">🚛</div>
+              <div class="ping-mini"></div>
+              <div style="position:absolute; top:12px; right:12px; font-size:0.7rem;
               color:var(--color-atenuado); background:rgba(0,0,0,0.4);
               padding:3px 8px; border-radius:6px;">GPS · En vivo</div>
-          </div>
-          <div class="pastilla-notificacion">
-            <div class="icono-notif"><i class="bi bi-bell-fill"></i></div>
-            <div>
-              <div style="font-weight:600; font-size:0.82rem; color:var(--color-texto);">¡Tu camión llega en 3 min!</div>
-              <div style="font-size:0.75rem; color:var(--color-atenuado);">ABC-123 · Ruta Centro Histórico — Hace un momento</div>
             </div>
-          </div>
-          <div class="row g-2 mt-2">
-            <div class="col-4">
-              <div class="mini-metrica">
-                <div class="mini-metrica-num" style="color:var(--color-verde);">12</div>
-                <div class="mini-metrica-etq">Camiones</div>
+            <div class="pastilla-notificacion">
+              <div class="icono-notif"><i class="bi bi-bell-fill"></i></div>
+              <div>
+                <div style="font-weight:600; font-size:0.82rem; color:var(--color-texto);">¡Tu camión llega en 3 min!
+                </div>
+                <div style="font-size:0.75rem; color:var(--color-atenuado);">ABC-123 · Ruta Centro Histórico — Hace un
+                  momento</div>
               </div>
             </div>
-            <div class="col-4">
-              <div class="mini-metrica" style="background:rgba(239,159,39,0.08); border-color:rgba(239,159,39,0.18);">
-                <div class="mini-metrica-num" style="color:var(--color-acento);">48</div>
-                <div class="mini-metrica-etq">Rutas activas</div>
+            <div class="row g-2 mt-2">
+              <div class="col-4">
+                <div class="mini-metrica">
+                  <div class="mini-metrica-num" style="color:var(--color-verde);">12</div>
+                  <div class="mini-metrica-etq">Camiones</div>
+                </div>
               </div>
-            </div>
-            <div class="col-4">
-              <div class="mini-metrica" style="background:rgba(55,138,221,0.08); border-color:rgba(55,138,221,0.18);">
-                <div class="mini-metrica-num" style="color:#378add;">2.4k</div>
-                <div class="mini-metrica-etq">Usuarios</div>
+              <div class="col-4">
+                <div class="mini-metrica" style="background:rgba(239,159,39,0.08); border-color:rgba(239,159,39,0.18);">
+                  <div class="mini-metrica-num" style="color:var(--color-acento);">48</div>
+                  <div class="mini-metrica-etq">Rutas activas</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="mini-metrica" style="background:rgba(55,138,221,0.08); border-color:rgba(55,138,221,0.18);">
+                  <div class="mini-metrica-num" style="color:#378add;">2.4k</div>
+                  <div class="mini-metrica-etq">Usuarios</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
-
     </div>
-  </div>
-</section>
+  </section>
 
-<div class="separador"></div>
+  <div class="separador"></div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN PROBLEMÁTICA
      ═══════════════════════════════════════ -->
-<section class="seccion-problema" id="problema">
-  <div class="container">
-    <div class="row mb-5">
-      <div class="col-lg-7">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-exclamation-triangle-fill"></i> &nbsp;Contexto</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Una problemática que afecta a miles de peruanos</h2>
-        <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
-          La gestión de residuos sólidos en el Perú enfrenta deficiencias estructurales que normalizan
-          condiciones de insalubridad. Identificamos cuatro puntos críticos:
-        </p>
+  <section class="seccion-problema" id="problema">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-7">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-exclamation-triangle-fill"></i> &nbsp;Contexto
+          </div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Una problemática que afecta a miles de peruanos
+          </h2>
+          <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
+            La gestión de residuos sólidos en el Perú enfrenta deficiencias estructurales que normalizan
+            condiciones de insalubridad. Identificamos cuatro puntos críticos:
+          </p>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-1">
+          <div class="tarjeta-problema">
+            <div class="icono-problema naranja"><i class="bi bi-trash3-fill"></i></div>
+            <h4>Acumulación en vía pública</h4>
+            <p>Sin horarios claros, los ciudadanos depositan residuos en esquinas a cualquier hora, generando focos de
+              contaminación y proliferación de plagas.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-2">
+          <div class="tarjeta-problema">
+            <div class="icono-problema rojo"><i class="bi bi-clock-history"></i></div>
+            <h4>Servicio impredecible</h4>
+            <p>Los usuarios no saben si el camión ya pasó, está próximo o tiene retrasos, generando incertidumbre e
+              incumplimiento de normas municipales.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-3">
+          <div class="tarjeta-problema">
+            <div class="icono-problema azul"><i class="bi bi-diagram-3-fill"></i></div>
+            <h4>Logística ineficiente</h4>
+            <p>Sin monitoreo basado en datos, las rutas son ineficientes, derivando en recorridos redundantes y menor
+              efectividad del servicio municipal.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-4">
+          <div class="tarjeta-problema">
+            <div class="icono-problema morado"><i class="bi bi-chat-square-x-fill"></i></div>
+            <h4>Brecha comunicativa</h4>
+            <p>Existe una falta grave de canales digitales entre la municipalidad y la ciudadanía para informar sobre la
+              proximidad del servicio de recolección.</p>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-1">
-        <div class="tarjeta-problema">
-          <div class="icono-problema naranja"><i class="bi bi-trash3-fill"></i></div>
-          <h4>Acumulación en vía pública</h4>
-          <p>Sin horarios claros, los ciudadanos depositan residuos en esquinas a cualquier hora, generando focos de contaminación y proliferación de plagas.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-2">
-        <div class="tarjeta-problema">
-          <div class="icono-problema rojo"><i class="bi bi-clock-history"></i></div>
-          <h4>Servicio impredecible</h4>
-          <p>Los usuarios no saben si el camión ya pasó, está próximo o tiene retrasos, generando incertidumbre e incumplimiento de normas municipales.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-3">
-        <div class="tarjeta-problema">
-          <div class="icono-problema azul"><i class="bi bi-diagram-3-fill"></i></div>
-          <h4>Logística ineficiente</h4>
-          <p>Sin monitoreo basado en datos, las rutas son ineficientes, derivando en recorridos redundantes y menor efectividad del servicio municipal.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3 aparece-arriba aparece-arriba-4">
-        <div class="tarjeta-problema">
-          <div class="icono-problema morado"><i class="bi bi-chat-square-x-fill"></i></div>
-          <h4>Brecha comunicativa</h4>
-          <p>Existe una falta grave de canales digitales entre la municipalidad y la ciudadanía para informar sobre la proximidad del servicio de recolección.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<div class="separador"></div>
+  <div class="separador"></div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN MAPA INTERACTIVO
      ═══════════════════════════════════════ -->
-<section class="seccion-mapa" id="mapa">
-  <div class="container">
-    <div class="row mb-4 align-items-end">
-      <div class="col-lg-7">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-broadcast"></i> &nbsp;Monitoreo en vivo</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Mapa interactivo de EcoRutas</h2>
-        <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
-          Visualiza la posición de los camiones recolectores en tiempo real. Los vehículos
-          se mueven de forma simulada para esta demostración.
-        </p>
-      </div>
-      <div class="col-lg-5 text-lg-end aparece-arriba aparece-arriba-3">
-        <span class="d-inline-flex align-items-center gap-2" style="font-size:0.8rem; color:var(--color-atenuado);">
-          <span style="width:8px;height:8px;border-radius:50%;background:var(--color-verde);
+  <section class="seccion-mapa" id="mapa">
+    <div class="container">
+      <div class="row mb-4 align-items-end">
+        <div class="col-lg-7">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-broadcast"></i> &nbsp;Monitoreo en vivo</div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Mapa interactivo de EcoRutas</h2>
+          <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
+            Visualiza la posición de los camiones recolectores en tiempo real. Los vehículos
+            se mueven de forma simulada para esta demostración.
+          </p>
+        </div>
+        <div class="col-lg-5 text-lg-end aparece-arriba aparece-arriba-3">
+          <span class="d-inline-flex align-items-center gap-2" style="font-size:0.8rem; color:var(--color-atenuado);">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--color-verde);
             display:inline-block;animation:animacion-pulso 2s infinite;"></span>
-          Actualización: cada 5 seg &nbsp;·&nbsp; Lima, Perú
-        </span>
-      </div>
-    </div>
-    <div class="row g-4 aparece-arriba">
-      <div class="col-lg-8">
-        <div id="contenedor-mapa">
-          <div id="mapa-principal"></div>
+            Actualización: cada 5 seg &nbsp;·&nbsp; Lima, Perú
+          </span>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="panel-control-mapa">
-          <h5><i class="bi bi-truck me-2" style="color:var(--color-verde);"></i>Unidades activas</h5>
-          <div id="lista-camiones"></div>
-          <div class="caja-alerta">
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <i class="bi bi-bell-fill" style="color:var(--color-acento); font-size:0.9rem;"></i>
-              <span style="font-size:0.8rem; font-weight:600; color:var(--color-acento);">Alerta de proximidad</span>
-            </div>
-            <p id="alerta-en-vivo">DEF-456 se acerca al Jr. de la Unión. ¡Tenga sus residuos listos!</p>
+      <div class="row g-4 aparece-arriba">
+        <div class="col-lg-8">
+          <div id="contenedor-mapa">
+            <div id="mapa-principal"></div>
           </div>
-          <div style="margin-top:1.2rem; padding-top:1rem; border-top:1px solid var(--color-borde);">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span style="font-size:0.78rem; color:var(--color-atenuado);">Cobertura del día</span>
-              <span style="font-size:0.78rem; color:var(--color-verde); font-weight:600;" id="porcentaje-cobertura">67%</span>
+        </div>
+        <div class="col-lg-4">
+          <div class="panel-control-mapa">
+            <h5><i class="bi bi-truck me-2" style="color:var(--color-verde);"></i>Unidades activas</h5>
+            <div id="lista-camiones"></div>
+            <div class="caja-alerta">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-bell-fill" style="color:var(--color-acento); font-size:0.9rem;"></i>
+                <span style="font-size:0.8rem; font-weight:600; color:var(--color-acento);">Alerta de proximidad</span>
+              </div>
+              <p id="alerta-en-vivo">DEF-456 se acerca al Jr. de la Unión. ¡Tenga sus residuos listos!</p>
             </div>
-            <div style="background:rgba(29,158,117,0.1); border-radius:100px; height:6px; overflow:hidden;">
-              <div id="barra-cobertura" style="background:linear-gradient(90deg,var(--color-verde),#9FE1CB);
+            <div style="margin-top:1.2rem; padding-top:1rem; border-top:1px solid var(--color-borde);">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span style="font-size:0.78rem; color:var(--color-atenuado);">Cobertura del día</span>
+                <span style="font-size:0.78rem; color:var(--color-verde); font-weight:600;"
+                  id="porcentaje-cobertura">67%</span>
+              </div>
+              <div style="background:rgba(29,158,117,0.1); border-radius:100px; height:6px; overflow:hidden;">
+                <div id="barra-cobertura" style="background:linear-gradient(90deg,var(--color-verde),#9FE1CB);
                 height:100%; border-radius:100px; width:67%; transition:width 1s ease;"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<div class="separador"></div>
+  <div class="separador"></div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN FUNCIONALIDADES
      ═══════════════════════════════════════ -->
-<section class="seccion-funcionalidades" id="funcionalidades">
-  <div class="container">
-    <div class="row mb-5">
-      <div class="col-lg-6">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-stars"></i> &nbsp;Funcionalidades</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Todo lo que EcoRuta ofrece</h2>
+  <section class="seccion-funcionalidades" id="funcionalidades">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-6">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-stars"></i> &nbsp;Funcionalidades</div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Todo lo que EcoRuta ofrece</h2>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-1">
+          <div class="tarjeta-funcionalidad">
+            <div class="numero-funcionalidad">01</div>
+            <div class="icono-funcionalidad"><i class="bi bi-geo-alt-fill"></i></div>
+            <h4>Geolocalización GPS</h4>
+            <p>Cada vehículo recolector cuenta con un dispositivo GPS integrado que transmite su posición en tiempo real
+              a la plataforma web.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-2">
+          <div class="tarjeta-funcionalidad">
+            <div class="numero-funcionalidad">02</div>
+            <div class="icono-funcionalidad"><i class="bi bi-bell-fill"></i></div>
+            <h4>Notificaciones inteligentes</h4>
+            <p>El sistema detecta cuando un camión se aproxima a tu calle y envía alertas push con tiempo estimado de
+              llegada.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-3">
+          <div class="tarjeta-funcionalidad">
+            <div class="numero-funcionalidad">03</div>
+            <div class="icono-funcionalidad"><i class="bi bi-map-fill"></i></div>
+            <h4>Mapa de ecoruta</h4>
+            <p>Visualiza en un mapa interactivo el recorrido programado y la posición actual de todas las unidades de tu
+              distrito.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-1">
+          <div class="tarjeta-funcionalidad">
+            <div class="numero-funcionalidad">04</div>
+            <div class="icono-funcionalidad"><i class="bi bi-bar-chart-line-fill"></i></div>
+            <h4>Dashboard municipal</h4>
+            <p>Las municipalidades acceden a analítica de cobertura, tiempos promedio, incidencias y optimización
+              automática de rutas.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-2">
+          <div class="tarjeta-funcionalidad">
+            <div class="numero-funcionalidad">05</div>
+            <div class="icono-funcionalidad"><i class="bi bi-phone-fill"></i></div>
+            <h4>App ciudadana</h4>
+            <p>Interfaz intuitiva para vecinos: consulta horarios, activa alertas personalizadas y reporta incidencias
+              en la recolección.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-3">
+          <div class="tarjeta-funcionalidad">
+            <div class="numero-funcionalidad">06</div>
+            <div class="icono-funcionalidad"><i class="bi bi-shield-fill-check"></i></div>
+            <h4>Corresponsabilidad</h4>
+            <p>Sistema de puntos para ciudadanos que depositan residuos en el momento correcto, promoviendo la cultura
+              de limpieza urbana.</p>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-1">
-        <div class="tarjeta-funcionalidad">
-          <div class="numero-funcionalidad">01</div>
-          <div class="icono-funcionalidad"><i class="bi bi-geo-alt-fill"></i></div>
-          <h4>Geolocalización GPS</h4>
-          <p>Cada vehículo recolector cuenta con un dispositivo GPS integrado que transmite su posición en tiempo real a la plataforma web.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-2">
-        <div class="tarjeta-funcionalidad">
-          <div class="numero-funcionalidad">02</div>
-          <div class="icono-funcionalidad"><i class="bi bi-bell-fill"></i></div>
-          <h4>Notificaciones inteligentes</h4>
-          <p>El sistema detecta cuando un camión se aproxima a tu calle y envía alertas push con tiempo estimado de llegada.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-3">
-        <div class="tarjeta-funcionalidad">
-          <div class="numero-funcionalidad">03</div>
-          <div class="icono-funcionalidad"><i class="bi bi-map-fill"></i></div>
-          <h4>Mapa de ecoruta</h4>
-          <p>Visualiza en un mapa interactivo el recorrido programado y la posición actual de todas las unidades de tu distrito.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-1">
-        <div class="tarjeta-funcionalidad">
-          <div class="numero-funcionalidad">04</div>
-          <div class="icono-funcionalidad"><i class="bi bi-bar-chart-line-fill"></i></div>
-          <h4>Dashboard municipal</h4>
-          <p>Las municipalidades acceden a analítica de cobertura, tiempos promedio, incidencias y optimización automática de rutas.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-2">
-        <div class="tarjeta-funcionalidad">
-          <div class="numero-funcionalidad">05</div>
-          <div class="icono-funcionalidad"><i class="bi bi-phone-fill"></i></div>
-          <h4>App ciudadana</h4>
-          <p>Interfaz intuitiva para vecinos: consulta horarios, activa alertas personalizadas y reporta incidencias en la recolección.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4 aparece-arriba aparece-arriba-3">
-        <div class="tarjeta-funcionalidad">
-          <div class="numero-funcionalidad">06</div>
-          <div class="icono-funcionalidad"><i class="bi bi-shield-fill-check"></i></div>
-          <h4>Corresponsabilidad</h4>
-          <p>Sistema de puntos para ciudadanos que depositan residuos en el momento correcto, promoviendo la cultura de limpieza urbana.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<div class="separador"></div>
+  <div class="separador"></div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN CÓMO FUNCIONA
      ═══════════════════════════════════════ -->
-<section class="seccion-como-funciona" id="como-funciona">
-  <div class="container">
-    <div class="row mb-5">
-      <div class="col-lg-6">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-lightning-fill"></i> &nbsp;Proceso</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">¿Cómo funciona EcoRuta Conectada?</h2>
-        <p class="descripcion-seccion aparece-arriba aparece-arriba-2">Un flujo simple de tres actores: la municipalidad, el camión y el vecino.</p>
-      </div>
-    </div>
-    <div class="row align-items-center g-5">
-      <div class="col-lg-6 aparece-arriba">
-        <div class="paso-proceso">
-          <div class="numero-paso">01</div>
-          <div class="contenido-paso">
-            <h4>Municipalidad configura la ecoruta</h4>
-            <p>La gestión municipal registra los vehículos, carga los recorridos programados y asigna las zonas de cobertura por cada unidad.</p>
-          </div>
-        </div>
-        <div class="paso-proceso">
-          <div class="numero-paso">02</div>
-          <div class="contenido-paso">
-            <h4>Camión transmite su posición</h4>
-            <p>El dispositivo GPS en cada unidad recolectora envía coordenadas al servidor cada 5 segundos durante el recorrido activo.</p>
-          </div>
-        </div>
-        <div class="paso-proceso">
-          <div class="numero-paso">03</div>
-          <div class="contenido-paso">
-            <h4>Algoritmo calcula proximidad</h4>
-            <p>El sistema compara la posición del camión con las direcciones registradas y calcula el tiempo estimado de llegada para cada calle.</p>
-          </div>
-        </div>
-        <div class="paso-proceso">
-          <div class="numero-paso">04</div>
-          <div class="contenido-paso">
-            <h4>Vecino recibe alerta y saca su basura</h4>
-            <p>Con 3 a 5 minutos de anticipación, el ciudadano recibe una notificación push o SMS, llevando sus residuos exactamente a tiempo.</p>
-          </div>
+  <section class="seccion-como-funciona" id="como-funciona">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-6">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-lightning-fill"></i> &nbsp;Proceso</div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">¿Cómo funciona EcoRuta Conectada?</h2>
+          <p class="descripcion-seccion aparece-arriba aparece-arriba-2">Un flujo simple de tres actores: la
+            municipalidad, el camión y el vecino.</p>
         </div>
       </div>
-      <div class="col-lg-5 offset-lg-1 aparece-arriba aparece-arriba-2">
-        <div class="mockup-telefono">
-          <div style="text-align:center; margin-bottom:0.8rem;">
-            <div style="width:80px; height:4px; background:var(--color-borde); border-radius:2px; margin:0 auto;"></div>
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6 aparece-arriba">
+          <div class="paso-proceso">
+            <div class="numero-paso">01</div>
+            <div class="contenido-paso">
+              <h4>Municipalidad configura la ecoruta</h4>
+              <p>La gestión municipal registra los vehículos, carga los recorridos programados y asigna las zonas de
+                cobertura por cada unidad.</p>
+            </div>
           </div>
-          <div class="pantalla-telefono">
-            <div style="font-family:'Syne',sans-serif; font-size:0.8rem; font-weight:700;
+          <div class="paso-proceso">
+            <div class="numero-paso">02</div>
+            <div class="contenido-paso">
+              <h4>Camión transmite su posición</h4>
+              <p>El dispositivo GPS en cada unidad recolectora envía coordenadas al servidor cada 5 segundos durante el
+                recorrido activo.</p>
+            </div>
+          </div>
+          <div class="paso-proceso">
+            <div class="numero-paso">03</div>
+            <div class="contenido-paso">
+              <h4>Algoritmo calcula proximidad</h4>
+              <p>El sistema compara la posición del camión con las direcciones registradas y calcula el tiempo estimado
+                de llegada para cada calle.</p>
+            </div>
+          </div>
+          <div class="paso-proceso">
+            <div class="numero-paso">04</div>
+            <div class="contenido-paso">
+              <h4>Vecino recibe alerta y saca su basura</h4>
+              <p>Con 3 a 5 minutos de anticipación, el ciudadano recibe una notificación push o SMS, llevando sus
+                residuos exactamente a tiempo.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5 offset-lg-1 aparece-arriba aparece-arriba-2">
+          <div class="mockup-telefono">
+            <div style="text-align:center; margin-bottom:0.8rem;">
+              <div style="width:80px; height:4px; background:var(--color-borde); border-radius:2px; margin:0 auto;">
+              </div>
+            </div>
+            <div class="pantalla-telefono">
+              <div style="font-family:'Syne',sans-serif; font-size:0.8rem; font-weight:700;
               color:var(--color-verde); margin-bottom:1rem; letter-spacing:0.05em; text-transform:uppercase;">
-              EcoRuta · Alertas
-            </div>
-            <div class="notificacion-telefono">
-              <div style="font-size:1.2rem;">🚛</div>
-              <div>
-                <div class="titulo-notif">ABC-123 está en tu zona</div>
-                <div class="cuerpo-notif">Ruta Centro Histórico — llegada estimada 5 min</div>
-                <div class="hora-notif">Hace 2 min</div>
+                EcoRuta · Alertas
               </div>
-            </div>
-            <div class="notificacion-telefono">
-              <div style="font-size:1.2rem;">🔔</div>
-              <div>
-                <div class="titulo-notif">¡Saca tus residuos ahora!</div>
-                <div class="cuerpo-notif">ABC-123 llegará en aproximadamente 3 minutos</div>
-                <div class="hora-notif">Hace 1 min</div>
+              <div class="notificacion-telefono">
+                <div style="font-size:1.2rem;">🚛</div>
+                <div>
+                  <div class="titulo-notif">ABC-123 está en tu zona</div>
+                  <div class="cuerpo-notif">Ruta Centro Histórico — llegada estimada 5 min</div>
+                  <div class="hora-notif">Hace 2 min</div>
+                </div>
               </div>
-            </div>
-            <div class="notificacion-telefono" style="background:rgba(29,158,117,0.25); border-color:rgba(29,158,117,0.5);">
-              <div style="font-size:1.2rem;">✅</div>
-              <div>
-                <div class="titulo-notif" style="color:#9FE1CB;">Recolección completada</div>
-                <div class="cuerpo-notif" style="color:var(--color-verde);">DEF-456 pasó por tu calle exitosamente</div>
-                <div class="hora-notif">Ahora mismo</div>
+              <div class="notificacion-telefono">
+                <div style="font-size:1.2rem;">🔔</div>
+                <div>
+                  <div class="titulo-notif">¡Saca tus residuos ahora!</div>
+                  <div class="cuerpo-notif">ABC-123 llegará en aproximadamente 3 minutos</div>
+                  <div class="hora-notif">Hace 1 min</div>
+                </div>
               </div>
-            </div>
-            <div style="margin-top:1.2rem; background:rgba(29,158,117,0.07); border-radius:12px; padding:0.9rem;">
-              <div style="font-size:0.75rem; color:var(--color-atenuado); margin-bottom:0.5rem;">Próxima recolección</div>
-              <div style="font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--color-verde);">Mañana · 07:30 AM</div>
-              <div style="font-size:0.75rem; color:var(--color-atenuado);">Unidad GHI-789 · Ruta Miraflores Norte</div>
+              <div class="notificacion-telefono"
+                style="background:rgba(29,158,117,0.25); border-color:rgba(29,158,117,0.5);">
+                <div style="font-size:1.2rem;">✅</div>
+                <div>
+                  <div class="titulo-notif" style="color:#9FE1CB;">Recolección completada</div>
+                  <div class="cuerpo-notif" style="color:var(--color-verde);">DEF-456 pasó por tu calle exitosamente
+                  </div>
+                  <div class="hora-notif">Ahora mismo</div>
+                </div>
+              </div>
+              <div style="margin-top:1.2rem; background:rgba(29,158,117,0.07); border-radius:12px; padding:0.9rem;">
+                <div style="font-size:0.75rem; color:var(--color-atenuado); margin-bottom:0.5rem;">Próxima recolección
+                </div>
+                <div
+                  style="font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--color-verde);">
+                  Mañana · 07:30 AM</div>
+                <div style="font-size:0.75rem; color:var(--color-atenuado);">Unidad GHI-789 · Ruta Miraflores Norte
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<div class="separador"></div>
+  <div class="separador"></div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN IMPACTO
      ═══════════════════════════════════════ -->
-<section class="seccion-impacto" id="impacto">
-  <div class="container">
-    <div class="row mb-5 justify-content-center text-center">
-      <div class="col-lg-7">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-graph-up-arrow"></i> &nbsp;Impacto proyectado</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Resultados que transforman ciudades</h2>
-        <p class="descripcion-seccion mx-auto aparece-arriba aparece-arriba-2">
-          Estimaciones basadas en pilotos similares en ciudades latinoamericanas con sistemas GPS de recolección.
-        </p>
-      </div>
-    </div>
-    <div class="row g-4">
-      <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-1">
-        <div class="tarjeta-impacto">
-          <div class="numero-impacto">85<span class="unidad-impacto">%</span></div>
-          <div class="etiqueta-impacto">Reducción de residuos acumulados en espacios públicos</div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-2">
-        <div class="tarjeta-impacto">
-          <div class="numero-impacto">40<span class="unidad-impacto">%</span></div>
-          <div class="etiqueta-impacto">Mejora en eficiencia de rutas de recolección</div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-3">
-        <div class="tarjeta-impacto">
-          <div class="numero-impacto">3<span class="unidad-impacto">x</span></div>
-          <div class="etiqueta-impacto">Más satisfacción ciudadana con el servicio municipal</div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-4">
-        <div class="tarjeta-impacto">
-          <div class="numero-impacto">60<span class="unidad-impacto">%</span></div>
-          <div class="etiqueta-impacto">Reducción de tiempo de residuos en vía pública</div>
-        </div>
-      </div>
-    </div>
-    <div class="row mt-5 aparece-arriba">
-      <div class="col-12">
-        <div class="bloque-cta">
-          <div style="flex:1; min-width:250px;">
-            <div class="cta-titulo">¿Listo para conectar tu distrito?</div>
-            <p class="cta-desc">EcoRuta Conectada está disponible para municipalidades que quieran digitalizar su servicio de limpieza pública.</p>
+  <section class="seccion-impacto" id="impacto">
+    <div class="container">
+      <div class="row mb-5 justify-content-center text-center">
+        <div class="col-lg-7">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-graph-up-arrow"></i> &nbsp;Impacto proyectado
           </div>
-          <div class="d-flex gap-3 flex-wrap">
-            <a href="#mapa" class="boton-primario"><i class="bi bi-rocket-takeoff-fill"></i> Ver demo</a>
-            <a href="mailto:ecorutaconectada@gmail.com" class="boton-contorno"><i class="bi bi-envelope-fill"></i> Contactar</a>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Resultados que transforman ciudades</h2>
+          <p class="descripcion-seccion mx-auto aparece-arriba aparece-arriba-2">
+            Estimaciones basadas en pilotos similares en ciudades latinoamericanas con sistemas GPS de recolección.
+          </p>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-1">
+          <div class="tarjeta-impacto">
+            <div class="numero-impacto">85<span class="unidad-impacto">%</span></div>
+            <div class="etiqueta-impacto">Reducción de residuos acumulados en espacios públicos</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-2">
+          <div class="tarjeta-impacto">
+            <div class="numero-impacto">40<span class="unidad-impacto">%</span></div>
+            <div class="etiqueta-impacto">Mejora en eficiencia de rutas de recolección</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-3">
+          <div class="tarjeta-impacto">
+            <div class="numero-impacto">3<span class="unidad-impacto">x</span></div>
+            <div class="etiqueta-impacto">Más satisfacción ciudadana con el servicio municipal</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3 aparece-arriba aparece-arriba-4">
+          <div class="tarjeta-impacto">
+            <div class="numero-impacto">60<span class="unidad-impacto">%</span></div>
+            <div class="etiqueta-impacto">Reducción de tiempo de residuos en vía pública</div>
           </div>
         </div>
       </div>
+      <div class="row mt-5 aparece-arriba">
+        <div class="col-12">
+          <div class="bloque-cta">
+            <div style="flex:1; min-width:250px;">
+              <div class="cta-titulo">¿Listo para conectar tu distrito?</div>
+              <p class="cta-desc">EcoRuta Conectada está disponible para municipalidades que quieran digitalizar su
+                servicio de limpieza pública.</p>
+            </div>
+            <div class="d-flex gap-3 flex-wrap">
+              <a href="#mapa" class="boton-primario"><i class="bi bi-rocket-takeoff-fill"></i> Ver demo</a>
+              <a href="mailto:ecorutaconectada@gmail.com" class="boton-contorno"><i class="bi bi-envelope-fill"></i>
+                Contactar</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<div class="separador"></div>
+  <div class="separador"></div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN SOLICITUD DE CAMIÓN
      Solo visible para usuarios autenticados
      ═══════════════════════════════════════ -->
-<section class="seccion-solicitud" id="solicitud" style="display:none;">
-  <div class="container">
-    <div class="row mb-5">
-      <div class="col-lg-7">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-truck"></i> &nbsp;Servicio ciudadano</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Solicita un camión para tu zona</h2>
-        <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
-          ¿Tu calle no tiene cobertura o necesitas un servicio adicional?
-          Envía tu solicitud y la municipalidad la evaluará en 24 horas.
-        </p>
-      </div>
-    </div>
-    <div class="row g-4 aparece-arriba">
-      <div class="col-lg-7">
-        <div class="tarjeta-formulario-solicitud">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <div class="campo-formulario">
-                <label class="etiqueta-campo">
-                  <i class="bi bi-geo-alt-fill"></i> Dirección exacta
-                </label>
-                <input type="text" id="solicitudDireccion" class="entrada-campo"
-                  placeholder="Ej: Jr. Lima 245, Cercado"/>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="campo-formulario">
-                <label class="etiqueta-campo">
-                  <i class="bi bi-map-fill"></i> Distrito
-                </label>
-                <input type="text" id="solicitudDistrito" class="entrada-campo"
-                  placeholder="Ej: Miraflores"/>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="campo-formulario">
-                <label class="etiqueta-campo">
-                  <i class="bi bi-recycle"></i> Tipo de residuo
-                </label>
-                <select id="solicitudTipo" class="entrada-campo">
-                  <option value="general">Residuos generales</option>
-                  <option value="reciclaje">Reciclaje</option>
-                  <option value="organico">Residuos orgánicos</option>
-                  <option value="peligroso">Residuos peligrosos</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="campo-formulario">
-                <label class="etiqueta-campo">
-                  <i class="bi bi-calendar-week"></i> Frecuencia solicitada
-                </label>
-                <select id="solicitudFrecuencia" class="entrada-campo">
-                  <option value="diario">Diario</option>
-                  <option value="interdiario">Interdiario</option>
-                  <option value="semanal">Semanal</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="campo-formulario">
-                <label class="etiqueta-campo">
-                  <i class="bi bi-chat-text-fill"></i> Descripción adicional
-                </label>
-                <textarea id="solicitudDescripcion" class="entrada-campo"
-                  placeholder="Describe brevemente la situación de tu zona..."
-                  rows="3" style="resize:vertical;"></textarea>
-              </div>
-            </div>
-          </div>
-          <div class="mensaje-error" id="mensajeSolicitud" style="margin-top:1rem;">
-            <i class="bi bi-info-circle-fill"></i>
-            <span id="textoSolicitud"></span>
-          </div>
-          <button class="boton-primario" id="botonEnviarSolicitud"
-            style="margin-top:1.2rem; width:100%; justify-content:center;">
-            <i class="bi bi-send-fill"></i> Enviar solicitud
-          </button>
+  <section class="seccion-solicitud" id="solicitud" style="display:none;">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-7">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-truck"></i> &nbsp;Servicio ciudadano</div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Solicita un camión para tu zona</h2>
+          <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
+            ¿Tu calle no tiene cobertura o necesitas un servicio adicional?
+            Envía tu solicitud y la municipalidad la evaluará en 24 horas.
+          </p>
         </div>
       </div>
-      <div class="col-lg-5">
-        <div class="tarjeta-info-solicitud">
-          <h5 style="font-family:'Syne',sans-serif; font-weight:700;
+      <div class="row g-4 aparece-arriba">
+        <div class="col-lg-7">
+          <div class="tarjeta-formulario-solicitud">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="campo-formulario">
+                  <label class="etiqueta-campo">
+                    <i class="bi bi-geo-alt-fill"></i> Dirección exacta
+                  </label>
+                  <input type="text" id="solicitudDireccion" class="entrada-campo"
+                    placeholder="Ej: Jr. Lima 245, Cercado" />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="campo-formulario">
+                  <label class="etiqueta-campo">
+                    <i class="bi bi-map-fill"></i> Distrito
+                  </label>
+                  <input type="text" id="solicitudDistrito" class="entrada-campo" placeholder="Ej: Miraflores" />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="campo-formulario">
+                  <label class="etiqueta-campo">
+                    <i class="bi bi-recycle"></i> Tipo de residuo
+                  </label>
+                  <select id="solicitudTipo" class="entrada-campo">
+                    <option value="general">Residuos generales</option>
+                    <option value="reciclaje">Reciclaje</option>
+                    <option value="organico">Residuos orgánicos</option>
+                    <option value="peligroso">Residuos peligrosos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="campo-formulario">
+                  <label class="etiqueta-campo">
+                    <i class="bi bi-calendar-week"></i> Frecuencia solicitada
+                  </label>
+                  <select id="solicitudFrecuencia" class="entrada-campo">
+                    <option value="diario">Diario</option>
+                    <option value="interdiario">Interdiario</option>
+                    <option value="semanal">Semanal</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="campo-formulario">
+                  <label class="etiqueta-campo">
+                    <i class="bi bi-chat-text-fill"></i> Descripción adicional
+                  </label>
+                  <textarea id="solicitudDescripcion" class="entrada-campo"
+                    placeholder="Describe brevemente la situación de tu zona..." rows="3"
+                    style="resize:vertical;"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="mensaje-error" id="mensajeSolicitud" style="margin-top:1rem;">
+              <i class="bi bi-info-circle-fill"></i>
+              <span id="textoSolicitud"></span>
+            </div>
+            <button class="boton-primario" id="botonEnviarSolicitud"
+              style="margin-top:1.2rem; width:100%; justify-content:center;">
+              <i class="bi bi-send-fill"></i> Enviar solicitud
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="tarjeta-info-solicitud">
+            <h5 style="font-family:'Syne',sans-serif; font-weight:700;
             color:var(--color-texto); margin-bottom:1.2rem;">
-            <i class="bi bi-info-circle-fill me-2" style="color:var(--color-verde);"></i>¿Cómo funciona?
-          </h5>
-          <div class="paso-info">
-            <div class="numero-paso-info">1</div>
-            <div>
-              <div style="font-size:0.875rem; font-weight:600; color:var(--color-texto);">Envías tu solicitud</div>
-              <div style="font-size:0.8rem; color:var(--color-atenuado);">Completa el formulario con tu dirección y tipo de residuo.</div>
+              <i class="bi bi-info-circle-fill me-2" style="color:var(--color-verde);"></i>¿Cómo funciona?
+            </h5>
+            <div class="paso-info">
+              <div class="numero-paso-info">1</div>
+              <div>
+                <div style="font-size:0.875rem; font-weight:600; color:var(--color-texto);">Envías tu solicitud</div>
+                <div style="font-size:0.8rem; color:var(--color-atenuado);">Completa el formulario con tu dirección y
+                  tipo de residuo.</div>
+              </div>
             </div>
-          </div>
-          <div class="paso-info">
-            <div class="numero-paso-info">2</div>
-            <div>
-              <div style="font-size:0.875rem; font-weight:600; color:var(--color-texto);">La municipalidad evalúa</div>
-              <div style="font-size:0.8rem; color:var(--color-atenuado);">El equipo municipal revisa tu solicitud en un plazo de 24 horas.</div>
+            <div class="paso-info">
+              <div class="numero-paso-info">2</div>
+              <div>
+                <div style="font-size:0.875rem; font-weight:600; color:var(--color-texto);">La municipalidad evalúa
+                </div>
+                <div style="font-size:0.8rem; color:var(--color-atenuado);">El equipo municipal revisa tu solicitud en
+                  un plazo de 24 horas.</div>
+              </div>
             </div>
-          </div>
-          <div class="paso-info">
-            <div class="numero-paso-info">3</div>
-            <div>
-              <div style="font-size:0.875rem; font-weight:600; color:var(--color-texto);">Recibes una notificación</div>
-              <div style="font-size:0.8rem; color:var(--color-atenuado);">Te avisamos en la plataforma cuando tu solicitud sea aprobada.</div>
+            <div class="paso-info">
+              <div class="numero-paso-info">3</div>
+              <div>
+                <div style="font-size:0.875rem; font-weight:600; color:var(--color-texto);">Recibes una notificación
+                </div>
+                <div style="font-size:0.8rem; color:var(--color-atenuado);">Te avisamos en la plataforma cuando tu
+                  solicitud sea aprobada.</div>
+              </div>
             </div>
-          </div>
-          <div class="aviso-login-solicitud">
-            <i class="bi bi-shield-check-fill" style="color:var(--color-verde); font-size:1.1rem;"></i>
-            <span>Tu solicitud quedará registrada con tu cuenta de forma segura.</span>
+            <div class="aviso-login-solicitud">
+              <i class="bi bi-shield-check-fill" style="color:var(--color-verde); font-size:1.1rem;"></i>
+              <span>Tu solicitud quedará registrada con tu cuenta de forma segura.</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<div class="separador"></div>
+  <div class="separador"></div>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SECCIÓN PANEL DE USUARIO
      Solo visible para usuarios autenticados
      ═══════════════════════════════════════ -->
-<section class="seccion-panel-usuario" id="panel-usuario" style="display:none;">
-  <div class="container">
-    <div class="row mb-4">
-      <div class="col-lg-7">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-bell-fill"></i> &nbsp;Mi cuenta</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Historial de notificaciones</h2>
-        <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
-          Revisa todas las alertas recibidas sobre los camiones cercanos a tu zona.
-        </p>
+  <section class="seccion-panel-usuario" id="panel-usuario" style="display:none;">
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-lg-7">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-bell-fill"></i> &nbsp;Mi cuenta</div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">Historial de notificaciones</h2>
+          <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
+            Revisa todas las alertas recibidas sobre los camiones cercanos a tu zona.
+          </p>
+        </div>
+      </div>
+      <div class="row g-4 aparece-arriba">
+        <div class="col-lg-8">
+          <div class="tarjeta-panel-usuario">
+            <div class="panel-usuario-cabecera">
+              <h4><i class="bi bi-list-ul me-2" style="color:var(--color-verde);"></i>Mis alertas recientes</h4>
+              <span style="font-size:0.78rem; color:var(--color-atenuado);" id="conteo-notificaciones">—</span>
+            </div>
+            <div id="historial-notificaciones">
+              <div class="historial-vacio">
+                <i class="bi bi-bell-slash"></i>
+                <p>Inicia sesión para ver tus notificaciones.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="tarjeta-calificacion aparece-arriba aparece-arriba-2">
+            <div class="etiqueta-seccion" style="justify-content:center;">
+              <i class="bi bi-star-fill"></i> &nbsp;Califica el servicio
+            </div>
+            <p style="font-size:0.85rem; color:var(--color-atenuado); margin:0.5rem 0 0;">
+              ¿Cómo fue la recolección de hoy en tu zona?
+            </p>
+            <div class="estrellas-calificacion" id="estrellas-calificacion">
+              <span class="estrella" data-valor="1">★</span>
+              <span class="estrella" data-valor="2">★</span>
+              <span class="estrella" data-valor="3">★</span>
+              <span class="estrella" data-valor="4">★</span>
+              <span class="estrella" data-valor="5">★</span>
+            </div>
+            <p style="font-size:0.8rem; color:var(--color-atenuado);" id="texto-calificacion">
+              Selecciona una puntuación
+            </p>
+            <button class="boton-primario" id="botonEnviarCalificacion"
+              style="width:100%; justify-content:center; margin-top:0.8rem; display:none;">
+              <i class="bi bi-send-fill"></i> Enviar calificación
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="row g-4 aparece-arriba">
-      <div class="col-lg-8">
-        <div class="tarjeta-panel-usuario">
-          <div class="panel-usuario-cabecera">
-            <h4><i class="bi bi-list-ul me-2" style="color:var(--color-verde);"></i>Mis alertas recientes</h4>
-            <span style="font-size:0.78rem; color:var(--color-atenuado);" id="conteo-notificaciones">—</span>
+  </section>
+
+  <div class="separador"></div>
+
+
+  <!-- ═══════════════════════════════════════
+     SECCIÓN FAQ
+     ═══════════════════════════════════════ -->
+  <section class="seccion-faq" id="faq">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-6">
+          <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-question-circle-fill"></i> &nbsp;Preguntas
+            frecuentes</div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">¿Tienes dudas sobre EcoRuta?</h2>
+          <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
+            Aquí respondemos las preguntas más comunes de nuestros vecinos y municipalidades.
+          </p>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+          <div class="faq-item">
+            <button class="faq-pregunta">
+              <span class="faq-pregunta-texto">¿Cómo sé cuándo llegará el camión a mi calle?</span>
+              <i class="bi bi-plus-lg faq-icono"></i>
+            </button>
+            <div class="faq-respuesta">
+              <p class="faq-respuesta-texto">
+                Al registrarte y activar las notificaciones, el sistema calcula automáticamente
+                cuándo un camión está a menos de 300 metros de tu ubicación y te envía una alerta
+                con el tiempo estimado de llegada.
+              </p>
+            </div>
           </div>
-          <div id="historial-notificaciones">
+
+          <div class="faq-item">
+            <button class="faq-pregunta">
+              <span class="faq-pregunta-texto">¿Necesito instalar una aplicación?</span>
+              <i class="bi bi-plus-lg faq-icono"></i>
+            </button>
+            <div class="faq-respuesta">
+              <p class="faq-respuesta-texto">
+                No. EcoRuta Conectada funciona completamente desde el navegador web, sin necesidad
+                de descargar ninguna app. Solo necesitas crear una cuenta gratuita.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-pregunta">
+              <span class="faq-pregunta-texto">¿Cómo solicito un camión para mi zona?</span>
+              <i class="bi bi-plus-lg faq-icono"></i>
+            </button>
+            <div class="faq-respuesta">
+              <p class="faq-respuesta-texto">
+                Inicia sesión en tu cuenta y ve a la sección "Solicita un camión para tu zona".
+                Completa el formulario con tu dirección y tipo de residuo. La municipalidad
+                evaluará tu solicitud en un plazo de 24 horas.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-pregunta">
+              <span class="faq-pregunta-texto">¿Es gratuito el servicio?</span>
+              <i class="bi bi-plus-lg faq-icono"></i>
+            </button>
+            <div class="faq-respuesta">
+              <p class="faq-respuesta-texto">
+                Sí, EcoRuta Conectada es completamente gratuito para los ciudadanos. El servicio
+                es financiado por las municipalidades que adoptan la plataforma para mejorar
+                su gestión de residuos.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-pregunta">
+              <span class="faq-pregunta-texto">¿Mis datos están seguros?</span>
+              <i class="bi bi-plus-lg faq-icono"></i>
+            </button>
+            <div class="faq-respuesta">
+              <p class="faq-respuesta-texto">
+                Sí. Tu contraseña se almacena cifrada con bcrypt y nunca se guarda en texto plano.
+                La comunicación entre tu navegador y el servidor está protegida. Además, la base
+                de datos cuenta con Row Level Security (RLS) activado para proteger tus datos
+                a nivel de base de datos.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-pregunta">
+              <span class="faq-pregunta-texto">¿Qué hago si el camión no pasó por mi zona?</span>
+              <i class="bi bi-plus-lg faq-icono"></i>
+            </button>
+            <div class="faq-respuesta">
+              <p class="faq-respuesta-texto">
+                Puedes usar el formulario de "Solicita un camión para tu zona" para notificar
+                el inconveniente. También puedes calificar el servicio del día para que la
+                municipalidad tome las medidas necesarias.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <div class="separador"></div>
+
+
+  <!-- ═══════════════════════════════════════
+     PANEL MUNICIPAL
+     Solo visible para rol municipalidad/admin
+     ═══════════════════════════════════════ -->
+  <section class="seccion-panel-municipal" id="panel-municipal" style="display:none;">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-lg-8">
+          <div class="etiqueta-seccion aparece-arriba">
+            <i class="bi bi-building"></i> &nbsp;Panel Municipal
+          </div>
+          <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">
+            Gestión de solicitudes ciudadanas
+          </h2>
+          <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
+            Revisa y gestiona las solicitudes de recolección enviadas por los vecinos.
+          </p>
+        </div>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div class="row g-3 mb-4 aparece-arriba" id="estadisticas-municipales">
+        <div class="col-6 col-lg-3">
+          <div class="tarjeta-estadistica-mun">
+            <div class="estadistica-mun-num" id="stat-vecinos">—</div>
+            <div class="estadistica-mun-etq">Vecinos registrados</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="tarjeta-estadistica-mun">
+            <div class="estadistica-mun-num" id="stat-camiones">—</div>
+            <div class="estadistica-mun-etq">Camiones operativos</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="tarjeta-estadistica-mun" style="border-color:rgba(239,159,39,0.35);">
+            <div class="estadistica-mun-num" style="color:var(--color-acento);" id="stat-pendientes">—</div>
+            <div class="estadistica-mun-etq">Solicitudes pendientes</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="tarjeta-estadistica-mun">
+            <div class="estadistica-mun-num" id="stat-alertas-hoy">—</div>
+            <div class="estadistica-mun-etq">Alertas enviadas hoy</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros de solicitudes -->
+      <div class="row mb-3 aparece-arriba">
+        <div class="col-12">
+          <div class="filtros-solicitudes">
+            <button class="filtro-btn activo" data-filtro="">Todas</button>
+            <button class="filtro-btn" data-filtro="pendiente">Pendientes</button>
+            <button class="filtro-btn" data-filtro="en_proceso">En proceso</button>
+            <button class="filtro-btn" data-filtro="aprobada">Aprobadas</button>
+            <button class="filtro-btn" data-filtro="rechazada">Rechazadas</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de solicitudes -->
+      <div class="row aparece-arriba">
+        <div class="col-12">
+          <div class="tarjeta-panel-municipal" id="lista-solicitudes-municipal">
             <div class="historial-vacio">
-              <i class="bi bi-bell-slash"></i>
-              <p>Inicia sesión para ver tus notificaciones.</p>
+              <i class="bi bi-inbox"></i>
+              <p>Cargando solicitudes...</p>
             </div>
           </div>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="tarjeta-calificacion aparece-arriba aparece-arriba-2">
-          <div class="etiqueta-seccion" style="justify-content:center;">
-            <i class="bi bi-star-fill"></i> &nbsp;Califica el servicio
-          </div>
-          <p style="font-size:0.85rem; color:var(--color-atenuado); margin:0.5rem 0 0;">
-            ¿Cómo fue la recolección de hoy en tu zona?
-          </p>
-          <div class="estrellas-calificacion" id="estrellas-calificacion">
-            <span class="estrella" data-valor="1">★</span>
-            <span class="estrella" data-valor="2">★</span>
-            <span class="estrella" data-valor="3">★</span>
-            <span class="estrella" data-valor="4">★</span>
-            <span class="estrella" data-valor="5">★</span>
-          </div>
-          <p style="font-size:0.8rem; color:var(--color-atenuado);" id="texto-calificacion">
-            Selecciona una puntuación
-          </p>
-          <button class="boton-primario" id="botonEnviarCalificacion"
-            style="width:100%; justify-content:center; margin-top:0.8rem; display:none;">
-            <i class="bi bi-send-fill"></i> Enviar calificación
-          </button>
-        </div>
-      </div>
+
     </div>
-  </div>
-</section>
-
-<div class="separador"></div>
+  </section>
 
 
-<!-- ═══════════════════════════════════════
-     SECCIÓN FAQ
-     ═══════════════════════════════════════ -->
-<section class="seccion-faq" id="faq">
-  <div class="container">
-    <div class="row mb-5">
-      <div class="col-lg-6">
-        <div class="etiqueta-seccion aparece-arriba"><i class="bi bi-question-circle-fill"></i> &nbsp;Preguntas frecuentes</div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">¿Tienes dudas sobre EcoRuta?</h2>
-        <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
-          Aquí respondemos las preguntas más comunes de nuestros vecinos y municipalidades.
-        </p>
-      </div>
-    </div>
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-
-        <div class="faq-item">
-          <button class="faq-pregunta">
-            <span class="faq-pregunta-texto">¿Cómo sé cuándo llegará el camión a mi calle?</span>
-            <i class="bi bi-plus-lg faq-icono"></i>
-          </button>
-          <div class="faq-respuesta">
-            <p class="faq-respuesta-texto">
-              Al registrarte y activar las notificaciones, el sistema calcula automáticamente
-              cuándo un camión está a menos de 300 metros de tu ubicación y te envía una alerta
-              con el tiempo estimado de llegada.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-pregunta">
-            <span class="faq-pregunta-texto">¿Necesito instalar una aplicación?</span>
-            <i class="bi bi-plus-lg faq-icono"></i>
-          </button>
-          <div class="faq-respuesta">
-            <p class="faq-respuesta-texto">
-              No. EcoRuta Conectada funciona completamente desde el navegador web, sin necesidad
-              de descargar ninguna app. Solo necesitas crear una cuenta gratuita.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-pregunta">
-            <span class="faq-pregunta-texto">¿Cómo solicito un camión para mi zona?</span>
-            <i class="bi bi-plus-lg faq-icono"></i>
-          </button>
-          <div class="faq-respuesta">
-            <p class="faq-respuesta-texto">
-              Inicia sesión en tu cuenta y ve a la sección "Solicita un camión para tu zona".
-              Completa el formulario con tu dirección y tipo de residuo. La municipalidad
-              evaluará tu solicitud en un plazo de 24 horas.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-pregunta">
-            <span class="faq-pregunta-texto">¿Es gratuito el servicio?</span>
-            <i class="bi bi-plus-lg faq-icono"></i>
-          </button>
-          <div class="faq-respuesta">
-            <p class="faq-respuesta-texto">
-              Sí, EcoRuta Conectada es completamente gratuito para los ciudadanos. El servicio
-              es financiado por las municipalidades que adoptan la plataforma para mejorar
-              su gestión de residuos.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-pregunta">
-            <span class="faq-pregunta-texto">¿Mis datos están seguros?</span>
-            <i class="bi bi-plus-lg faq-icono"></i>
-          </button>
-          <div class="faq-respuesta">
-            <p class="faq-respuesta-texto">
-              Sí. Tu contraseña se almacena cifrada con bcrypt y nunca se guarda en texto plano.
-              La comunicación entre tu navegador y el servidor está protegida. Además, la base
-              de datos cuenta con Row Level Security (RLS) activado para proteger tus datos
-              a nivel de base de datos.
-            </p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-pregunta">
-            <span class="faq-pregunta-texto">¿Qué hago si el camión no pasó por mi zona?</span>
-            <i class="bi bi-plus-lg faq-icono"></i>
-          </button>
-          <div class="faq-respuesta">
-            <p class="faq-respuesta-texto">
-              Puedes usar el formulario de "Solicita un camión para tu zona" para notificar
-              el inconveniente. También puedes calificar el servicio del día para que la
-              municipalidad tome las medidas necesarias.
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<div class="separador"></div>
-
-
-<!-- ═══════════════════════════════════════
-     PANEL MUNICIPAL
-     Solo visible para rol municipalidad/admin
-     ═══════════════════════════════════════ -->
-<section class="seccion-panel-municipal" id="panel-municipal" style="display:none;">
-  <div class="container">
-    <div class="row mb-5">
-      <div class="col-lg-8">
-        <div class="etiqueta-seccion aparece-arriba">
-          <i class="bi bi-building"></i> &nbsp;Panel Municipal
-        </div>
-        <h2 class="titulo-seccion aparece-arriba aparece-arriba-1">
-          Gestión de solicitudes ciudadanas
-        </h2>
-        <p class="descripcion-seccion aparece-arriba aparece-arriba-2">
-          Revisa y gestiona las solicitudes de recolección enviadas por los vecinos.
-        </p>
-      </div>
-    </div>
-
-    <!-- Estadísticas rápidas -->
-    <div class="row g-3 mb-4 aparece-arriba" id="estadisticas-municipales">
-      <div class="col-6 col-lg-3">
-        <div class="tarjeta-estadistica-mun">
-          <div class="estadistica-mun-num" id="stat-vecinos">—</div>
-          <div class="estadistica-mun-etq">Vecinos registrados</div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="tarjeta-estadistica-mun">
-          <div class="estadistica-mun-num" id="stat-camiones">—</div>
-          <div class="estadistica-mun-etq">Camiones operativos</div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="tarjeta-estadistica-mun" style="border-color:rgba(239,159,39,0.35);">
-          <div class="estadistica-mun-num" style="color:var(--color-acento);" id="stat-pendientes">—</div>
-          <div class="estadistica-mun-etq">Solicitudes pendientes</div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="tarjeta-estadistica-mun">
-          <div class="estadistica-mun-num" id="stat-alertas-hoy">—</div>
-          <div class="estadistica-mun-etq">Alertas enviadas hoy</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filtros de solicitudes -->
-    <div class="row mb-3 aparece-arriba">
-      <div class="col-12">
-        <div class="filtros-solicitudes">
-          <button class="filtro-btn activo" data-filtro="">Todas</button>
-          <button class="filtro-btn" data-filtro="pendiente">Pendientes</button>
-          <button class="filtro-btn" data-filtro="en_proceso">En proceso</button>
-          <button class="filtro-btn" data-filtro="aprobada">Aprobadas</button>
-          <button class="filtro-btn" data-filtro="rechazada">Rechazadas</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Lista de solicitudes -->
-    <div class="row aparece-arriba">
-      <div class="col-12">
-        <div class="tarjeta-panel-municipal" id="lista-solicitudes-municipal">
-          <div class="historial-vacio">
-            <i class="bi bi-inbox"></i>
-            <p>Cargando solicitudes...</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      PIE DE PÁGINA
      ═══════════════════════════════════════ -->
-<footer class="pie-pagina">
-  <div class="container">
-    <div class="row g-4">
-      <div class="col-lg-4">
-        <div class="marca-pie">Eco<span>Ruta</span> Conectada</div>
-        <p class="descripcion-pie">Transformando la gestión de residuos sólidos en el Perú mediante tecnología GPS y notificaciones ciudadanas en tiempo real.</p>
-        <div class="d-flex gap-3 mt-3" style="display:none !important;"></div>
+  <footer class="pie-pagina">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="marca-pie">Eco<span>Ruta</span> Conectada</div>
+          <p class="descripcion-pie">Transformando la gestión de residuos sólidos en el Perú mediante tecnología GPS y
+            notificaciones ciudadanas en tiempo real.</p>
+          <div class="d-flex gap-3 mt-3" style="display:none !important;"></div>
+        </div>
+        <div class="col-6 col-lg-2 offset-lg-1">
+          <div class="titulo-columna-pie">Plataforma</div>
+          <a href="#mapa" class="enlace-pie">Mapa en vivo</a>
+          <a href="#como-funciona" class="enlace-pie">Cómo funciona</a>
+          <a href="#funcionalidades" class="enlace-pie">Funcionalidades</a>
+          <a href="#impacto" class="enlace-pie">Impacto</a>
+          <a href="#faq" class="enlace-pie">Preguntas frecuentes</a>
+        </div>
+        <div class="col-6 col-lg-2">
+          <div class="titulo-columna-pie">Municipalidad</div>
+          <a href="dashboard.html" class="enlace-pie">Dashboard</a>
+          <a href="#" class="enlace-pie">Registrar flota</a>
+          <a href="#" class="enlace-pie">Configurar rutas</a>
+          <a href="#" class="enlace-pie">Reportes</a>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="titulo-columna-pie">Contacto</div>
+          <a href="mailto:ecorutaconectada@gmail.com" class="enlace-pie">
+            <i class="bi bi-envelope me-1"></i> ecorutaconectada@gmail.com
+          </a>
+          <a href="#" class="enlace-pie">
+            <i class="bi bi-geo-alt me-1"></i> Lima, Perú
+          </a>
+        </div>
       </div>
-      <div class="col-6 col-lg-2 offset-lg-1">
-        <div class="titulo-columna-pie">Plataforma</div>
-        <a href="#mapa"            class="enlace-pie">Mapa en vivo</a>
-        <a href="#como-funciona"   class="enlace-pie">Cómo funciona</a>
-        <a href="#funcionalidades" class="enlace-pie">Funcionalidades</a>
-        <a href="#impacto"         class="enlace-pie">Impacto</a>
-        <a href="#faq"             class="enlace-pie">Preguntas frecuentes</a>
-      </div>
-      <div class="col-6 col-lg-2">
-        <div class="titulo-columna-pie">Municipalidad</div>
-        <a href="dashboard.html" class="enlace-pie">Dashboard</a>
-        <a href="#" class="enlace-pie">Registrar flota</a>
-        <a href="#" class="enlace-pie">Configurar rutas</a>
-        <a href="#" class="enlace-pie">Reportes</a>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="titulo-columna-pie">Contacto</div>
-        <a href="mailto:ecorutaconectada@gmail.com" class="enlace-pie">
-          <i class="bi bi-envelope me-1"></i> ecorutaconectada@gmail.com
-        </a>
-        <a href="#" class="enlace-pie">
-          <i class="bi bi-geo-alt me-1"></i> Lima, Perú
-        </a>
+      <div class="franja-inferior-pie d-flex justify-content-between flex-wrap gap-2">
+        <span>© 2026 EcoRuta Conectada. Todos los derechos reservados.</span>
+        <span>Desarrollado con <span style="color:var(--color-verde)">♥</span> para el Perú</span>
       </div>
     </div>
-    <div class="franja-inferior-pie d-flex justify-content-between flex-wrap gap-2">
-      <span>© 2026 EcoRuta Conectada. Todos los derechos reservados.</span>
-      <span>Desarrollado con <span style="color:var(--color-verde)">♥</span> para el Perú</span>
-    </div>
-  </div>
-</footer>
+  </footer>
 
 
-<!-- ═══════════════════════════════════════
+  <!-- ═══════════════════════════════════════
      SCRIPTS
      ═══════════════════════════════════════ -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="EcoJava.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="EcoJava.js"></script>
 
 </body>
+
 </html>
