@@ -70,8 +70,11 @@ function cerrarModal() {
   campoCorreoReg.value     = '';
   campoContrasenaReg.value = '';
   campoConfirmarReg.value  = '';
-  /* Agregar esta línea: */
+  /* Limpiar vista de recuperar — AGREGAR ESTO */
   if (vistaRecuperar) vistaRecuperar.style.display = 'none';
+  if (mensajeRecuperar) mensajeRecuperar.classList.remove('visible');
+  if (campoCorreoRecuperar) campoCorreoRecuperar.value = '';
+
   mostrarVistaLogin();
 }
 
@@ -86,11 +89,13 @@ function mostrarVistaRegistro() {
 /* Cambiar a la vista de login */
 function mostrarVistaLogin() {
   vistaRegistro.style.display = 'none';
-  vistaLogin.style.display    = 'flex';
-  /* Agregar esta línea: */
   if (vistaRecuperar) vistaRecuperar.style.display = 'none';
+  vistaLogin.style.display    = 'flex';
   subtituloModal.textContent  = 'Ingresa a tu cuenta para continuar';
   mensajeErrorReg.classList.remove('visible');
+  /* Limpiar mensaje de recuperar — AGREGAR ESTO */
+  if (mensajeRecuperar) mensajeRecuperar.classList.remove('visible');
+  if (campoCorreoRecuperar) campoCorreoRecuperar.value = '';
 }
 
 /* Botón "Crear cuenta gratis" → ir a registro */
