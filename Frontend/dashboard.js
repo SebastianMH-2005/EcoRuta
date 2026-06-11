@@ -6,7 +6,7 @@
 /* URL del backend */
 var URL_BACKEND = window.location.hostname === 'localhost'
   ? 'http://localhost:3000'
-  : 'https://ecoruta-production.up.railway.app';
+  : 'https://ecoruta-backend.onrender.com';
 
 /* Token y datos de sesión del panel */
 var tokenDash     = null;
