@@ -1221,3 +1221,256 @@ if (botonCalificacion) {
     }
   });
 }
+
+/* ══════════════════════════════════════
+   MENÚ DE USUARIO — PERFIL, NOTIFICACIONES
+   Y CONFIRMACIÓN DE CERRAR SESIÓN
+   ══════════════════════════════════════ */
+
+var menuUsuarioNav        = document.getElementById('menuUsuarioNav');
+var botonPerfilNav        = document.getElementById('botonPerfilNav');
+var dropdownPerfil        = document.getElementById('dropdownPerfil');
+var botonCampana          = document.getElementById('botonCampana');
+var dropdownNotificaciones = document.getElementById('dropdownNotificaciones');
+var contadorCampana       = document.getElementById('contadorCampana');
+var fondoConfirmLogout    = document.getElementById('fondoConfirmLogout');
+var cancelarLogout        = document.getElementById('cancelarLogout');
+var confirmarLogout       = document.getElementById('confirmarLogout');
+var iconoChevron          = document.getElementById('iconoChevron');
+
+/* Abrir/cerrar dropdown del perfil */
+if (botonPerfilNav) {
+  botonPerfilNav.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var abierto = dropdownPerfil.style.display === 'block';
+    cerrarTodosDropdowns();
+    if (!abierto) {
+      dropdownPerfil.style.display = 'block';
+      iconoChevron.style.transform = 'rotate(180deg)';
+    }
+  });
+}
+
+/* Abrir/cerrar dropdown de notificaciones */
+if (botonCampana) {
+  botonCampana.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var abierto = dropdownNotificaciones.style.display === 'block';
+    cerrarTodosDropdowns();
+    if (!abierto) {
+      dropdownNotificaciones.style.display = 'block';
+      cargarNotifDropdown();
+    }
+  });
+}
+
+/* Cerrar dropdowns al hacer clic fuera */
+document.addEventListener('click', function() {
+  cerrarTodosDropdowns();
+});
+
+function cerrarTodosDropdowns() {
+  if (dropdownPerfil)        dropdownPerfil.style.display        = 'none';
+  if (dropdownNotificaciones) dropdownNotificaciones.style.display = 'none';
+  if (iconoChevron)          iconoChevron.style.transform        = 'rotate(0deg)';
+}
+
+/* Cargar datos del perfil en el dropdown */
+async function cargarDatosPerfil() {
+  var token  = localStorage.getItem('eco_token');
+  var nombre = localStorage.getItem('eco_nombre') || 'Usuario';
+  var rol    = localStorage.getItem('eco_rol')    || 'vecino';
+
+  /* Actualizar nombre y avatar */
+  var inicial = nombre.charAt(0).toUpperCase();
+  var els = {
+    avatarNav:   document.getElementById('avatarPerfilNav'),
+    avatarGrande:document.getElementById('avatarGrande'),
+    nombreNav:   document.getElementById('nombrePerfilNav'),
+    nombre:      document.getElementById('dropdownNombre'),
+    correo:      document.getElementById('dropdownCorreo'),
+    rolEl:       document.getElementById('dropdownRol')
+  };
+
+  if (els.avatarNav)    els.avatarNav.textContent    = inicial;
+  if (els.avatarGrande) els.avatarGrande.textContent = inicial;
+  if (els.nombreNav)    els.nombreNav.textContent    = nombre.split(' ')[0];
+  if (els.nombre)       els.nombre.textContent       = nombre;
+  if (els.rolEl)        els.rolEl.textContent        = rol;
+
+  if (!token) return;
+
+  try {
+    /* Cargar correo desde el perfil */
+    var resp  = await fetch(URL_BACKEND + '/api/perfil', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var datos = await resp.json();
+    if (datos.ok && els.correo) {
+      els.correo.textContent = datos.usuario.correo || '—';
+    }
+
+    /* Cargar estadísticas */
+    var respNotif = await fetch(URL_BACKEND + '/api/notificaciones', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var datosNotif = await respNotif.json();
+    var totalAlertas = datosNotif.ok ? datosNotif.notificaciones.length : 0;
+    var noLeidas     = datosNotif.ok
+      ? datosNotif.notificaciones.filter(function(n) { return !n.leida; }).length
+      : 0;
+
+    var statAlertas = document.getElementById('statAlertas');
+    if (statAlertas) statAlertas.textContent = totalAlertas;
+
+    /* Actualizar contador campana */
+    if (contadorCampana) {
+      if (noLeidas > 0) {
+        contadorCampana.textContent = noLeidas > 9 ? '9+' : noLeidas;
+        contadorCampana.style.display = 'flex';
+      } else {
+        contadorCampana.style.display = 'none';
+      }
+    }
+
+  } catch (error) {
+    console.error('Error al cargar perfil:', error.message);
+  }
+
+  /* Cargar solicitudes del usuario */
+  try {
+    var respSol  = await fetch(URL_BACKEND + '/api/mis-solicitudes', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var datosSol = await respSol.json();
+    var statSol  = document.getElementById('statSolicitudes');
+    if (statSol && datosSol.ok) {
+      statSol.textContent = datosSol.solicitudes.length;
+    }
+  } catch (e) { /* silencioso */ }
+}
+
+/* Cargar notificaciones en el dropdown de la campana */
+async function cargarNotifDropdown() {
+  var token     = localStorage.getItem('eco_token');
+  var contenedor = document.getElementById('listaNotifDropdown');
+  if (!token || !contenedor) return;
+
+  try {
+    var resp  = await fetch(URL_BACKEND + '/api/notificaciones', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var datos = await resp.json();
+
+    if (!datos.ok || datos.notificaciones.length === 0) {
+      contenedor.innerHTML =
+        '<div class="notif-dropdown-vacia">' +
+          '<i class="bi bi-bell-slash"></i>' +
+          '<p>Sin notificaciones aún</p>' +
+        '</div>';
+      return;
+    }
+
+    /* Mostrar las 5 más recientes */
+    var recientes = datos.notificaciones.slice(0, 5);
+    contenedor.innerHTML = recientes.map(function(n) {
+      var fecha = new Date(n.fecha_hora);
+      var hora  = fecha.toLocaleTimeString('es-PE', { hour:'2-digit', minute:'2-digit' });
+      return (
+        '<div class="notif-dropdown-item">' +
+          '<div style="font-size:1.2rem;">🚛</div>' +
+          '<div>' +
+            '<div class="notif-dropdown-msg">' + n.mensaje.substring(0, 80) + '...</div>' +
+            '<div class="notif-dropdown-hora">' + hora + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+  } catch (error) {
+    console.error('Error al cargar notificaciones dropdown:', error.message);
+  }
+}
+
+/* Confirmación de cerrar sesión */
+var botonCerrarSesionMenu = document.getElementById('botonCerrarSesion');
+if (botonCerrarSesionMenu) {
+  botonCerrarSesionMenu.addEventListener('click', function(e) {
+    e.stopPropagation();
+    cerrarTodosDropdowns();
+    fondoConfirmLogout.classList.add('activo');
+  });
+}
+
+if (cancelarLogout) {
+  cancelarLogout.addEventListener('click', function() {
+    fondoConfirmLogout.classList.remove('activo');
+  });
+}
+
+if (confirmarLogout) {
+  confirmarLogout.addEventListener('click', function() {
+    fondoConfirmLogout.classList.remove('activo');
+    cerrarSesion();
+  });
+}
+
+/* Cerrar modal de confirmación con Escape */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    fondoConfirmLogout.classList.remove('activo');
+  }
+});
+
+/* Actualizar actualizarNavbar para usar el nuevo menú */
+function actualizarNavbar(nombre) {
+  var botonNav       = document.getElementById('botonAbrirLogin');
+  var botonDashboard = document.getElementById('irDashboard');
+  var rol            = localStorage.getItem('eco_rol');
+
+  /* Ocultar botón de login y mostrar menú de usuario */
+  if (botonNav)        botonNav.style.display        = 'none';
+  if (menuUsuarioNav)  menuUsuarioNav.style.display   = 'flex';
+
+  /* Mostrar botón dashboard solo para municipalidad y admin */
+  if (botonDashboard && (rol === 'municipalidad' || rol === 'admin')) {
+    botonDashboard.style.display = 'flex';
+  }
+
+  /* Mostrar secciones que requieren login */
+  var seccionSolicitud = document.getElementById('solicitud');
+  var seccionPanel     = document.getElementById('panel-usuario');
+  if (seccionSolicitud) seccionSolicitud.style.display = 'block';
+  if (seccionPanel)     seccionPanel.style.display     = 'block';
+
+  /* Cargar datos del perfil y notificaciones */
+  cargarDatosPerfil();
+  cargarHistorialNotificaciones();
+}
+
+/* Actualizar cerrarSesion para ocultar el menú */
+function cerrarSesion() {
+  localStorage.removeItem('eco_token');
+  localStorage.removeItem('eco_nombre');
+  localStorage.removeItem('eco_rol');
+
+  var botonNav = document.getElementById('botonAbrirLogin');
+  if (botonNav) {
+    botonNav.style.display = 'inline-flex';
+    botonNav.addEventListener('click', abrirModal);
+  }
+
+  if (menuUsuarioNav) menuUsuarioNav.style.display = 'none';
+
+  var contador = document.getElementById('contadorAlertas');
+  if (contador) contador.remove();
+
+  var seccionSolicitud = document.getElementById('solicitud');
+  var seccionPanel     = document.getElementById('panel-usuario');
+  if (seccionSolicitud) seccionSolicitud.style.display = 'none';
+  if (seccionPanel)     seccionPanel.style.display     = 'none';
+
+  limpiarHistorial();
+  cerrarTodosDropdowns();
+  console.log('Sesión cerrada correctamente.');
+}

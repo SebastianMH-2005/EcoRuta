@@ -181,18 +181,109 @@
         <a href="#mapa" class="boton-primario" style="padding:0.45rem 1.2rem; font-size:0.85rem;">
           <i class="bi bi-geo-alt-fill"></i> Ver ruta
         </a>
-        <button class="boton-sesion-nav" id="botonAbrirLogin">
-          <i class="bi bi-person-fill"></i> Iniciar sesión
-        </button>
-        <a href="dashboard.html" class="boton-sesion-nav" id="botonDashboard" style="display:none; background:rgba(239,159,39,0.12);
-               border-color:rgba(239,159,39,0.3); color:var(--color-acento);
-               text-decoration:none;">
-          <i class="bi bi-speedometer2"></i> Panel municipal
-        </a>
-        <button class="boton-sesion-nav" id="botonCerrarSesion" style="display:none; background:rgba(226,75,74,0.12);
-               border-color:rgba(226,75,74,0.3); color:#e24b4a;">
-          <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-        </button>
+<button class="boton-sesion-nav" id="botonAbrirLogin">
+  <i class="bi bi-person-fill"></i> Iniciar sesión
+</button>
+
+<!-- Menú de usuario autenticado -->
+<div class="menu-usuario-nav" id="menuUsuarioNav" style="display:none; position:relative;">
+
+  <!-- Botón campana de notificaciones -->
+  <button class="boton-campana" id="botonCampana" title="Notificaciones">
+    <i class="bi bi-bell-fill"></i>
+    <span class="contador-campana" id="contadorCampana" style="display:none;">0</span>
+  </button>
+
+  <!-- Dropdown de notificaciones -->
+  <div class="dropdown-notificaciones" id="dropdownNotificaciones" style="display:none;">
+    <div class="dropdown-notif-cabecera">
+      <span>Notificaciones recientes</span>
+      <a href="#panel-usuario" class="ver-todas-notif">Ver todas</a>
+    </div>
+    <div id="listaNotifDropdown">
+      <div class="notif-dropdown-vacia">
+        <i class="bi bi-bell-slash"></i>
+        <p>Sin notificaciones</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón de perfil con nombre -->
+  <button class="boton-perfil-nav" id="botonPerfilNav">
+    <div class="avatar-perfil-nav" id="avatarPerfilNav">S</div>
+    <span id="nombrePerfilNav">Usuario</span>
+    <i class="bi bi-chevron-down" id="iconoChevron"></i>
+  </button>
+
+  <!-- Dropdown del perfil -->
+  <div class="dropdown-perfil" id="dropdownPerfil" style="display:none;">
+
+    <!-- Info del usuario -->
+    <div class="dropdown-perfil-header">
+      <div class="avatar-perfil-grande" id="avatarGrande">S</div>
+      <div>
+        <div class="dropdown-perfil-nombre" id="dropdownNombre">Usuario</div>
+        <div class="dropdown-perfil-correo" id="dropdownCorreo">—</div>
+        <span class="dropdown-perfil-rol" id="dropdownRol">vecino</span>
+      </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="dropdown-perfil-stats">
+      <div class="stat-perfil">
+        <div class="stat-perfil-num" id="statSolicitudes">0</div>
+        <div class="stat-perfil-etq">Solicitudes</div>
+      </div>
+      <div class="stat-perfil">
+        <div class="stat-perfil-num" id="statAlertas">0</div>
+        <div class="stat-perfil-etq">Alertas</div>
+      </div>
+    </div>
+
+    <div class="dropdown-perfil-divider"></div>
+
+    <!-- Opciones del menú -->
+    <a href="#panel-usuario" class="dropdown-perfil-item" id="irPanelUsuario">
+      <i class="bi bi-bell-fill"></i> Mis notificaciones
+    </a>
+    <a href="#solicitud" class="dropdown-perfil-item">
+      <i class="bi bi-truck"></i> Solicitar camión
+    </a>
+    <a href="dashboard.html" class="dropdown-perfil-item" id="irDashboard"
+      style="display:none;">
+      <i class="bi bi-speedometer2"></i> Panel municipal
+    </a>
+
+    <div class="dropdown-perfil-divider"></div>
+
+    <!-- Cerrar sesión -->
+    <button class="dropdown-perfil-item cerrar-sesion-item" id="botonCerrarSesion">
+      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </button>
+  </div>
+</div>
+
+<!-- Modal de confirmación de cerrar sesión -->
+<div class="fondo-confirm-logout" id="fondoConfirmLogout">
+  <div class="modal-confirm-logout">
+    <div class="modal-confirm-icono">
+      <i class="bi bi-box-arrow-right"></i>
+    </div>
+    <h4 class="modal-confirm-titulo">¿Cerrar sesión?</h4>
+    <p class="modal-confirm-desc">
+      Saldrás de tu cuenta de EcoRuta Conectada.
+      Tendrás que volver a iniciar sesión para acceder.
+    </p>
+    <div class="modal-confirm-botones">
+      <button class="modal-confirm-cancelar" id="cancelarLogout">
+        Cancelar
+      </button>
+      <button class="modal-confirm-confirmar" id="confirmarLogout">
+        <i class="bi bi-box-arrow-right"></i> Sí, cerrar sesión
+      </button>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   </nav>

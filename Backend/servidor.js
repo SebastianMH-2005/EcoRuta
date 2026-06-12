@@ -788,6 +788,23 @@ app.post('/api/nueva-contrasena', async function(req, res) {
   }
 });
 
+// ─── GET /api/mis-solicitudes ────────────────────────────────
+app.get('/api/mis-solicitudes', verificarToken, async function(req, res) {
+  try {
+    var resultado = await pool.query(
+      `SELECT id_solicitud, direccion, distrito, tipo_residuo,
+              frecuencia, estado, fecha_solicitud
+       FROM solicitud_camion
+       WHERE id_usuario = $1
+       ORDER BY fecha_solicitud DESC`,
+      [req.usuario.id]
+    );
+    res.json({ ok: true, solicitudes: resultado.rows });
+  } catch (error) {
+    res.status(500).json({ ok: false, mensaje: 'Error al obtener solicitudes.' });
+  }
+});
+
 
 // ═══════════════════════════════════════════════════════
 //  RUTA DE ESTADO DEL SERVIDOR (health check)
